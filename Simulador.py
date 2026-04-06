@@ -278,43 +278,47 @@ if st.session_state.rol == "host":
         
         st.title(f"⚡ REE - Control Central | {datos_hora['hora']}")
         
-        # HTML más compacto para que quepa todo
+        # HTML Ultra-compacto para que quepa todo en una pantalla
         html_visual = f"""
-<div style="background-color: #fffbeb; padding: 15px; border-radius: 12px; border: 2px solid #f59e0b; margin-bottom: 10px; box-shadow: 2px 2px 5px rgba(0,0,0,0.05);">
+<div style="background-color: #fffbeb; padding: 10px; border-radius: 10px; border: 2px solid #f59e0b; margin-bottom: 5px; box-shadow: 1px 1px 3px rgba(0,0,0,0.05);">
     <div style="display: flex; justify-content: space-around; text-align: center; align-items: center; flex-wrap: wrap;">
-        <div style="margin: 5px;">
-            <p style="color: #b45309; margin: 0; font-size: 0.9rem; font-weight: bold;">🏭 DEMANDA TOTAL</p>
-            <h2 style="color: #d97706; margin: 0;">{demanda_total} MW</h2>
+        <div style="margin: 2px;">
+            <p style="color: #b45309; margin: 0; font-size: 0.8rem; font-weight: bold;">🏭 DEMANDA</p>
+            <h3 style="color: #d97706; margin: 0; font-size: 1.4rem;">{demanda_total} MW</h3>
         </div>
-        <div style="margin: 5px; font-size: 1.5rem; color: #9ca3af; font-weight: bold;">-</div>
-        <div style="margin: 5px;">
-            <p style="color: #166534; margin: 0; font-size: 0.9rem; font-weight: bold;">🌱 RENOVABLES</p>
-            <h2 style="color: #22c55e; margin: 0;">{renovables} MW</h2>
+        <div style="font-size: 1.2rem; color: #9ca3af;">-</div>
+        <div style="margin: 2px;">
+            <p style="color: #166534; margin: 0; font-size: 0.8rem; font-weight: bold;">🌱 RENOV.</p>
+            <h3 style="color: #22c55e; margin: 0; font-size: 1.4rem;">{renovables} MW</h3>
         </div>
-        <div style="margin: 5px; font-size: 1.5rem; color: #9ca3af; font-weight: bold;">=</div>
-        <div style="margin: 5px; padding: 5px 15px; background-color: #fef3c7; border-radius: 8px; border: 2px dashed #ea580c;">
-            <p style="color: #ea580c; margin: 0; font-size: 0.9rem; font-weight: bold;">⚡ A CUBRIR</p>
-            <h2 style="color: #ea580c; margin: 0;">{demanda_residual} MW</h2>
+        <div style="font-size: 1.2rem; color: #9ca3af;">=</div>
+        <div style="margin: 2px; padding: 2px 10px; background-color: #fef3c7; border-radius: 8px; border: 1.5px dashed #ea580c;">
+            <p style="color: #ea580c; margin: 0; font-size: 0.8rem; font-weight: bold;">⚡ A CUBRIR</p>
+            <h3 style="color: #ea580c; margin: 0; font-size: 1.8rem;">{demanda_residual} MW</h3>
         </div>
     </div>
-    <div style="margin-top: 10px;">
-        <div style="width: 100%; background-color: #e5e7eb; border-radius: 10px; height: 20px; display: flex; overflow: hidden;">
-            <div style="width: {pct_renovables}%; background-color: #22c55e; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.7rem; font-weight: bold;">{pct_renovables:.0f}%</div>
-            <div style="width: {pct_residual}%; background-color: #f59e0b; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.7rem; font-weight: bold;">{pct_residual:.0f}%</div>
+    <div style="margin-top: 8px;">
+        <div style="width: 100%; background-color: #e5e7eb; border-radius: 8px; height: 18px; display: flex; overflow: hidden; border: 1px solid #ccc;">
+            <div style="width: {pct_renovables}%; background-color: #22c55e; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.7rem; font-weight: bold;">🌱 {pct_renovables:.0f}%</div>
+            <div style="width: {pct_residual}%; background-color: #f59e0b; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.7rem; font-weight: bold;">🔥 {pct_residual:.0f}%</div>
         </div>
     </div>
 </div>
 """
         st.markdown(html_visual, unsafe_allow_html=True)
 
-        # 2. FICHA TÉCNICA INTEGRADA (Versión Plana para el Host)
-        with st.container(border=True):
-            st.markdown("### 📋 Parámetros de las Centrales")
-            datos_tecnicos = {"Parámetro": ["Pot. Máx (MW)", "Coste Op (€)", "Cambio (€/MW)", "P/A (€)"]}
+        # 2. FICHA TÉCNICA INTEGRADA (Compacta)
+        with st.container():
+            # Quitamos el subheader grande y ponemos un texto en negrita pequeño
+            st.markdown("**📋 Parámetros de las Centrales**")
+            datos_t = {"Parámetro": ["Pot. Máx", "Coste Op", "Cambio", "P/A (€)"]}
             for tech, info in sala["TECNOLOGIAS"].items():
-                datos_tecnicos[tech] = [f"{info['pot_max']}", f"{info['coste_op']}", f"{info['coste_cambio']}", f"{info['coste_pa']}"]
+                # Acortamos nombres para ganar espacio horizontal
+                t_key = tech.replace("Ciclo Combinado", "Ciclo")
+                datos_t[t_key] = [f"{info['pot_max']}", f"{info['coste_op']}€", f"{info['coste_cambio']}€", f"{info['coste_pa']}€"]
             
-            df_host = pd.DataFrame(datos_tecnicos)
+            df_host = pd.DataFrame(datos_t)
+            # Usamos st.table porque es más plana que st.dataframe
             st.table(df_host.style.hide(axis="index"))
         
         # FASE: OFERTANDO (HOST ESPERA)
