@@ -323,8 +323,15 @@ if st.session_state.rol == "host":
             ofertas_recibidas = len(sala["ofertas"])
             total_equipos = len(sala["equipos"])
             
+            # --- SECCIÓN DE PROGRESO ---
             st.metric("Empresas que han enviado sus ofertas:", f"{ofertas_recibidas} de {total_equipos}")
             st.progress(ofertas_recibidas / total_equipos)
+
+            # --- NUEVA ADICIÓN: FICHA TÉCNICA VISIBLE PARA LA CLASE ---
+            st.markdown("---")
+            st.subheader("📋 Parámetros Técnicos del Mercado")
+            mostrar_ficha_tecnica(sala_id) # Llamamos a la función que ya definiste
+            st.markdown("---")
             
             st_autorefresh(interval=2000, key="refresh_host_ofertando")
             
