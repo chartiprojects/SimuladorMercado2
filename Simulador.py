@@ -195,39 +195,39 @@ if st.session_state.rol == "host":
     
     # 2. LOBBY DE ESPERA (HOST)
     if estado_sala == "esperando":
-        # Usamos un contenedor para agrupar todo lo superior
-        superior = st.container()
-        with superior:
-            col_izq, col_der = st.columns([1.1, 0.9])
-            
-            with col_izq:
-                st.title("⚡ Sala de Espera")
-                st.markdown("### 📲 ¡Escanea para participar!")
-                st.code(f"{URL_BASE}/?sala={sala_id}")
-                
-                equipos_unidos = sala["equipos"]
-                st.markdown(f"**Empresas registradas: {len(equipos_unidos)}**")
-                
-                if len(equipos_unidos) > 0:
-                    nombres_html = " ".join([f"<span style='background-color: #1e3a8a; color: white; padding: 5px 10px; border-radius: 8px; margin: 3px; display: inline-block; font-size: 0.9rem;'>{eq}</span>" for eq in equipos_unidos])
-                    st.markdown(nombres_html, unsafe_allow_html=True)
-                else:
-                    st.info("Esperando conexiones...")
-                
-                st_autorefresh(interval=2000, key="refresh_host_lobby")
-
-            with col_der:
-                # QR GRANDE Y ALINEADO ARRIBA
-                # Añadimos un pequeño espacio negativo para pegarlo al borde superior
-                st.markdown("<div style='margin-top: -40px;'></div>", unsafe_allow_html=True)
-                qr = qrcode.make(f"{URL_BASE}/?sala={sala_id}")
-                st.image(qr.get_image(), width=320) # QR vuelve a ser grande
+        st.title("⚡ Sala de Espera")
+        URL_BASE = "https://simuladormercado2-tf9xg2yjxcjjfs5dufe6jl.streamlit.app" 
+        url_invitacion = f"{URL_BASE}/?sala={sala_id}"
         
-        # Botón pegado justo debajo del bloque anterior
-        st.markdown("<div style='margin-top: -10px;'></div>", unsafe_allow_html=True)
+        # Reducimos el espacio entre columnas y el tamaño del QR
+        col_izq, col_der = st.columns([1.2, 0.8]) 
+        
+        with col_izq:
+            st.markdown("### 📲 ¡Escanea para participar!")
+            st.code(url_invitacion)
+            equipos_unidos = sala["equipos"]
+            st.markdown(f"**Empresas registradas: {len(equipos_unidos)}**")
+            
+            if len(equipos_unidos) > 0:
+                # Hacemos las etiquetas de los nombres un poco más pequeñas
+                nombres_html = " ".join([f"<span style='background-color: #1e3a8a; color: white; padding: 5px 10px; border-radius: 8px; margin: 3px; display: inline-block; font-size: 0.9rem;'>{eq}</span>" for eq in equipos_unidos])
+                st.markdown(nombres_html, unsafe_allow_html=True)
+            else:
+                st.info("Esperando conexiones...")
+            
+            st_autorefresh(interval=2000, key="refresh_host_lobby")
+            
+        with col_der:
+            # QR más pequeño para que no empuje el botón hacia abajo
+            qr = qrcode.make(url_invitacion)
+            st.image(qr.get_image(), width=220) # Antes estaba en 350, lo bajamos a 220
+        
+        # Subimos el botón quitando el st.divider() o haciéndolo más fino
+        st.markdown("<div style='margin-top: -20px;'></div>", unsafe_allow_html=True) # Truco para quitar espacio
+        
         if st.button("🚀 Empezar Partida", type="primary", use_container_width=True):
             if len(equipos_unidos) >= 2:
-                # ... (resto de tu lógica de inicialización igual) ...
+                # ... (resto de tu lógica de inicialización de tecnologías igual)
                 sala["estado"] = "jugando"
                 factor = 4 / len(equipos_unidos)
                 sala["TECNOLOGIAS"] = {
