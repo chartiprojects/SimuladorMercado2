@@ -278,45 +278,44 @@ if st.session_state.rol == "host":
         
         st.title(f"⚡ REE - Control Central | {datos_hora['hora']}")
         
-        # OJO AQUÍ: La variable sí está alineada con el resto del código Python
+        # HTML más compacto para que quepa todo
         html_visual = f"""
-<div style="background-color: #fffbeb; padding: 25px; border-radius: 15px; border: 2px solid #f59e0b; margin-bottom: 20px; box-shadow: 2px 2px 10px rgba(0,0,0,0.05);">
-<div style="display: flex; justify-content: space-around; text-align: center; align-items: center; flex-wrap: wrap;">
-<div style="margin: 10px;">
-<h3 style="color: #b45309; margin: 0; font-size: 1.3rem;">🏭 DEMANDA TOTAL</h3>
-<h1 style="font-size: 3rem; color: #d97706; margin: 0;"><strong>{demanda_total} MW</strong></h1>
-</div>
-<div style="margin: 10px;">
-<h1 style="font-size: 3rem; color: #9ca3af; margin: 0;"><strong>-</strong></h1>
-</div>
-<div style="margin: 10px;">
-<h3 style="color: #166534; margin: 0; font-size: 1.3rem;">🌱 RENOVABLES</h3>
-<h1 style="font-size: 3rem; color: #22c55e; margin: 0;"><strong>{renovables} MW</strong></h1>
-</div>
-<div style="margin: 10px;">
-<h1 style="font-size: 3rem; color: #9ca3af; margin: 0;"><strong>=</strong></h1>
-</div>
-<div style="margin: 10px; padding: 10px 20px; background-color: #fef3c7; border-radius: 10px; border: 2px dashed #ea580c;">
-<h3 style="color: #ea580c; margin: 0; font-size: 1.3rem;">⚡ A CUBRIR</h3>
-<h1 style="font-size: 3.5rem; color: #ea580c; margin: 0;"><strong>{demanda_residual} MW</strong></h1>
-</div>
-</div>
-<div style="margin-top: 25px;">
-<p style="text-align: center; margin-bottom: 8px; color: #4b5563; font-weight: bold; font-size: 1.1rem;">Mix Energético</p>
-<div style="width: 100%; background-color: #e5e7eb; border-radius: 20px; height: 35px; display: flex; overflow: hidden; border: 1px solid #d1d5db;">
-<div style="width: {pct_renovables}%; background-color: #22c55e; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1rem;">
-🌱 {pct_renovables:.1f}% 
-</div>
-<div style="width: {pct_residual}%; background-color: #f59e0b; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 1rem;">
-⚡ {pct_residual:.1f}% 
-</div>
-</div>
-</div>
+<div style="background-color: #fffbeb; padding: 15px; border-radius: 12px; border: 2px solid #f59e0b; margin-bottom: 10px; box-shadow: 2px 2px 5px rgba(0,0,0,0.05);">
+    <div style="display: flex; justify-content: space-around; text-align: center; align-items: center; flex-wrap: wrap;">
+        <div style="margin: 5px;">
+            <p style="color: #b45309; margin: 0; font-size: 0.9rem; font-weight: bold;">🏭 DEMANDA TOTAL</p>
+            <h2 style="color: #d97706; margin: 0;">{demanda_total} MW</h2>
+        </div>
+        <div style="margin: 5px; font-size: 1.5rem; color: #9ca3af; font-weight: bold;">-</div>
+        <div style="margin: 5px;">
+            <p style="color: #166534; margin: 0; font-size: 0.9rem; font-weight: bold;">🌱 RENOVABLES</p>
+            <h2 style="color: #22c55e; margin: 0;">{renovables} MW</h2>
+        </div>
+        <div style="margin: 5px; font-size: 1.5rem; color: #9ca3af; font-weight: bold;">=</div>
+        <div style="margin: 5px; padding: 5px 15px; background-color: #fef3c7; border-radius: 8px; border: 2px dashed #ea580c;">
+            <p style="color: #ea580c; margin: 0; font-size: 0.9rem; font-weight: bold;">⚡ A CUBRIR</p>
+            <h2 style="color: #ea580c; margin: 0;">{demanda_residual} MW</h2>
+        </div>
+    </div>
+    <div style="margin-top: 10px;">
+        <div style="width: 100%; background-color: #e5e7eb; border-radius: 10px; height: 20px; display: flex; overflow: hidden;">
+            <div style="width: {pct_renovables}%; background-color: #22c55e; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.7rem; font-weight: bold;">{pct_renovables:.0f}%</div>
+            <div style="width: {pct_residual}%; background-color: #f59e0b; display: flex; align-items: center; justify-content: center; color: white; font-size: 0.7rem; font-weight: bold;">{pct_residual:.0f}%</div>
+        </div>
+    </div>
 </div>
 """
-
-        # Y el st.markdown también lleva su sangría para no romper Python
         st.markdown(html_visual, unsafe_allow_html=True)
+
+        # 2. FICHA TÉCNICA INTEGRADA (Versión Plana para el Host)
+        with st.container(border=True):
+            st.markdown("### 📋 Parámetros de las Centrales")
+            datos_tecnicos = {"Parámetro": ["Pot. Máx (MW)", "Coste Op (€)", "Cambio (€/MW)", "P/A (€)"]}
+            for tech, info in sala["TECNOLOGIAS"].items():
+                datos_tecnicos[tech] = [f"{info['pot_max']}", f"{info['coste_op']}", f"{info['coste_cambio']}", f"{info['coste_pa']}"]
+            
+            df_host = pd.DataFrame(datos_tecnicos)
+            st.table(df_host.style.hide(axis="index"))
         
         # FASE: OFERTANDO (HOST ESPERA)
         if sala["fase"] == "ofertando":
@@ -327,10 +326,18 @@ if st.session_state.rol == "host":
             st.metric("Empresas que han enviado sus ofertas:", f"{ofertas_recibidas} de {total_equipos}")
             st.progress(ofertas_recibidas / total_equipos)
 
-            # --- NUEVA ADICIÓN: FICHA TÉCNICA VISIBLE PARA LA CLASE ---
-            st.markdown("---")
-            st.subheader("📋 Parámetros Técnicos del Mercado")
-            mostrar_ficha_tecnica(sala_id) # Llamamos a la función que ya definiste
+            # Creamos la tabla manualmente aquí para que NO sea un popup
+            datos_t = {"Parámetro": ["Pot. Máx (MW)", "Cambio Máx (MW)", "Coste Op (€)", "Cambio (€/MW)", "P/A (€)"]}
+            for tech, info in sala["TECNOLOGIAS"].items():
+                datos_t[tech] = [
+                    f"{info['pot_max']}", 
+                    f"{info['max_cambio']}", 
+                    f"{info['coste_op']}", 
+                    f"{info['coste_cambio']}", 
+                    f"{info['coste_pa']}"
+                ]
+            df_host = pd.DataFrame(datos_t)
+            st.table(df_host.style.hide(axis="index")) # st.table es perfecta para proyectar
             st.markdown("---")
             
             st_autorefresh(interval=2000, key="refresh_host_ofertando")
