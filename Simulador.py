@@ -193,35 +193,41 @@ if st.session_state.rol == "host":
     sala = db["salas"][sala_id]
     estado_sala = sala["estado"]
     
-    # 2. LOBBY DE ESPERA
+    # 2. LOBBY DE ESPERA (HOST)
     if estado_sala == "esperando":
         st.title("⚡ Sala de Espera")
         URL_BASE = "https://simuladormercado2-tf9xg2yjxcjjfs5dufe6jl.streamlit.app" 
         url_invitacion = f"{URL_BASE}/?sala={sala_id}"
         
-        col_izq, col_der = st.columns([1, 1])
+        # Reducimos el espacio entre columnas y el tamaño del QR
+        col_izq, col_der = st.columns([1.2, 0.8]) 
+        
         with col_izq:
             st.markdown("### 📲 ¡Escanea para participar!")
             st.code(url_invitacion)
             equipos_unidos = sala["equipos"]
-            st.markdown(f"### 👥 Empresas registradas: {len(equipos_unidos)}")
+            st.markdown(f"**Empresas registradas: {len(equipos_unidos)}**")
             
             if len(equipos_unidos) > 0:
-                nombres_html = " ".join([f"<span style='background-color: #1e3a8a; color: white; padding: 10px; border-radius: 10px; margin: 5px; display: inline-block;'>{eq}</span>" for eq in equipos_unidos])
+                # Hacemos las etiquetas de los nombres un poco más pequeñas
+                nombres_html = " ".join([f"<span style='background-color: #1e3a8a; color: white; padding: 5px 10px; border-radius: 8px; margin: 3px; display: inline-block; font-size: 0.9rem;'>{eq}</span>" for eq in equipos_unidos])
                 st.markdown(nombres_html, unsafe_allow_html=True)
             else:
-                st.warning("Esperando a que las empresas energéticas se conecten...")
+                st.info("Esperando conexiones...")
             
-            # 👇 CÓDIGO NUEVO SUSTITUYENDO AL BOTÓN
             st_autorefresh(interval=2000, key="refresh_host_lobby")
             
         with col_der:
+            # QR más pequeño para que no empuje el botón hacia abajo
             qr = qrcode.make(url_invitacion)
-            st.image(qr.get_image(), width=350)
+            st.image(qr.get_image(), width=220) # Antes estaba en 350, lo bajamos a 220
         
-        st.divider()
+        # Subimos el botón quitando el st.divider() o haciéndolo más fino
+        st.markdown("<div style='margin-top: -20px;'></div>", unsafe_allow_html=True) # Truco para quitar espacio
+        
         if st.button("🚀 Empezar Partida", type="primary", use_container_width=True):
             if len(equipos_unidos) >= 2:
+                # ... (resto de tu lógica de inicialización de tecnologías igual)
                 sala["estado"] = "jugando"
                 factor = 4 / len(equipos_unidos)
                 sala["TECNOLOGIAS"] = {
@@ -232,18 +238,14 @@ if st.session_state.rol == "host":
                 }
                 sala["dinero_acumulado"] = {eq: 500000 for eq in equipos_unidos}
                 sala["energia_acumulada"] = {eq: {tech: 0 for tech in sala["TECNOLOGIAS"].keys()} for eq in equipos_unidos}
-                
-                # 👇 AQUÍ ESTÁN LAS VARIABLES QUE FALTABAN INICIALIZAR 👇
                 sala["ronda_actual"] = 0
                 sala["fase"] = "ofertando"
                 sala["ofertas"] = {}
                 sala["potencia_asignada_anterior"] = {}
                 sala["hubo_apagon"] = False
-                # 👆 ------------------------------------------------ 👆
-
                 st.rerun()
             else:
-                st.error("¡Se necesitan al menos 2 empresas para que haya mercado!")
+                st.error("¡Se necesitan al menos 2 empresas!")
 
     # 3. JUEGO ACTIVO (HOST)
     elif estado_sala == "jugando":
