@@ -196,7 +196,7 @@ if st.session_state.rol == "host":
     # 2. LOBBY DE ESPERA
     if estado_sala == "esperando":
         st.title("⚡ Sala de Espera")
-        URL_BASE = "https://simuladormercado2-jyyg36vuwjm4cvjvepsvs9.streamlit.app" 
+        URL_BASE = "https://simuladormercado2-tf9xg2yjxcjjfs5dufe6jl.streamlit.app" 
         url_invitacion = f"{URL_BASE}/?sala={sala_id}"
         
         col_izq, col_der = st.columns([1, 1])
