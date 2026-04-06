@@ -490,6 +490,18 @@ if st.session_state.rol == "jugador":
     # Botón gigante y accesible en el móvil para abrir el Modal
     if st.button("🔍 Ver Capacidad y Costes de mis Centrales", use_container_width=True):
         mostrar_ficha_tecnica(sala_id)
+
+    saldo_actual = sala["dinero_acumulado"].get(mi_equipo, 0)
+        
+        # Diseño en una sola línea, con bordes finos y colores suaves
+        st.markdown(f"""
+            <div style="background-color: #f8fafc; padding: 8px 15px; border-radius: 8px; border: 1px solid #cbd5e1; margin-top: 10px; margin-bottom: 10px; display: flex; justify-content:建设; align-items: center; gap: 10px;">
+                <span style="font-size: 1.2rem;">💰</span>
+                <span style="color: #475569; font-size: 0.9rem; font-weight: bold;">SALDO ACUMULADO:</span>
+                <span style="color: #1e293b; font-size: 1.1rem; font-weight: 800; margin-left: auto;">{saldo_actual:,.0f} €</span>
+            </div>
+        """, unsafe_allow_html=True)
+        # --------------------------------------------------
         
     st.divider()
     
