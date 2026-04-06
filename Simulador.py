@@ -325,20 +325,6 @@ if st.session_state.rol == "host":
             # --- SECCIÓN DE PROGRESO ---
             st.metric("Empresas que han enviado sus ofertas:", f"{ofertas_recibidas} de {total_equipos}")
             st.progress(ofertas_recibidas / total_equipos)
-
-            # Creamos la tabla manualmente aquí para que NO sea un popup
-            datos_t = {"Parámetro": ["Pot. Máx (MW)", "Cambio Máx (MW)", "Coste Op (€)", "Cambio (€/MW)", "P/A (€)"]}
-            for tech, info in sala["TECNOLOGIAS"].items():
-                datos_t[tech] = [
-                    f"{info['pot_max']}", 
-                    f"{info['max_cambio']}", 
-                    f"{info['coste_op']}", 
-                    f"{info['coste_cambio']}", 
-                    f"{info['coste_pa']}"
-                ]
-            df_host = pd.DataFrame(datos_t)
-            st.table(df_host.style.hide(axis="index")) # st.table es perfecta para proyectar
-            st.markdown("---")
             
             st_autorefresh(interval=2000, key="refresh_host_ofertando")
             
