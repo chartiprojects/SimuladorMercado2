@@ -4,21 +4,24 @@ import qrcode
 import random
 from streamlit_autorefresh import st_autorefresh
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 import numpy as np
 import matplotlib.ticker as ticker
 
 # streamlit run SimuladorEquipos.py
 
-st.set_page_config(page_title="Simulador Mercado Eléctrico", layout="wide")
+st.set_page_config(page_title="Electricity Market Simulator", layout="wide")
 
 # ==========================================
 # 🌐 SISTEMA DE TRADUCCIONES
 # ==========================================
-LANG_OPTIONS = {"🇪🇸 Español": "es", "🇬🇧 English": "en", "🇫🇷 Français": "fr"}
+LANG_OPTIONS = {"🇬🇧 English": "en", "🇪🇸 Español": "es", "🇫🇷 Français": "fr"}
 
 TRADUCCIONES = {
     "es": {
         "page_title": "Simulador Mercado Eléctrico",
+        "language_screen_title": "⚡ Electricity Market Simulator",
+        "language_screen_subtitle": "Choose the game language / Elige el idioma / Choisissez la langue",
         "welcome_title": "⚡ ¡Bienvenido! Eres el operador del mercado (REE)",
         "choose_language": "🌐 Elige el idioma de la partida:",
         "generate_room": "👥 Generar Sala",
@@ -83,10 +86,19 @@ TRADUCCIONES = {
         "reconnect_info": "Tu sesión se ha cerrado. Introduce tu nombre de empresa para reconectarte:",
         "reconnect_btn": "Reconectarme",
         "reconnect_error": "No se encontró ninguna empresa con ese nombre en esta sala.",
-        "note_mw_mwh": "ℹ️ **MW vs MWh**: En este mercado **horario**, ofertamos **potencia (MW)**. Como cada período dura 1 hora, 1 MW despachado = 1 MWh producido. Los ingresos = MW despachados × precio (€/MWh) × 1 hora.",
+        "merit_order_title": "Curva de Oferta (Merit Order)",
+        "merit_order_x": "% Demanda Cubierta",
+        "merit_order_y": "Precio (€/MWh)",
+        "table_company": "Empresa",
+        "table_net_profit": "Beneficio Neto (€)",
+        "param_label": "Parámetro",
+        "final_merit_title": "📊 Curva Merit Order - Histórico",
+        "final_hour": "Hora",
     },
     "en": {
         "page_title": "Electricity Market Simulator",
+        "language_screen_title": "⚡ Electricity Market Simulator",
+        "language_screen_subtitle": "Choose the game language / Elige el idioma / Choisissez la langue",
         "welcome_title": "⚡ Welcome! You are the market operator (TSO)",
         "choose_language": "🌐 Choose the game language:",
         "generate_room": "👥 Create Room",
@@ -151,10 +163,19 @@ TRADUCCIONES = {
         "reconnect_info": "Your session has ended. Enter your company name to reconnect:",
         "reconnect_btn": "Reconnect",
         "reconnect_error": "No company with that name was found in this room.",
-        "note_mw_mwh": "ℹ️ **MW vs MWh**: In this **hourly** market, we offer **power (MW)**. Since each period lasts 1 hour, 1 dispatched MW = 1 MWh produced. Revenue = dispatched MW × price (€/MWh) × 1 hour.",
+        "merit_order_title": "Supply Curve (Merit Order)",
+        "merit_order_x": "% Demand Covered",
+        "merit_order_y": "Price (€/MWh)",
+        "table_company": "Company",
+        "table_net_profit": "Net Profit (€)",
+        "param_label": "Parameter",
+        "final_merit_title": "📊 Merit Order Curve - History",
+        "final_hour": "Hour",
     },
     "fr": {
         "page_title": "Simulateur Marché Électrique",
+        "language_screen_title": "⚡ Electricity Market Simulator",
+        "language_screen_subtitle": "Choose the game language / Elige el idioma / Choisissez la langue",
         "welcome_title": "⚡ Bienvenue ! Vous êtes l'opérateur du marché (RTE)",
         "choose_language": "🌐 Choisissez la langue du jeu :",
         "generate_room": "👥 Créer une Salle",
@@ -219,20 +240,26 @@ TRADUCCIONES = {
         "reconnect_info": "Votre session s'est fermée. Entrez le nom de votre entreprise pour vous reconnecter :",
         "reconnect_btn": "Me reconnecter",
         "reconnect_error": "Aucune entreprise avec ce nom n'a été trouvée dans cette salle.",
-        "note_mw_mwh": "ℹ️ **MW vs MWh** : Dans ce marché **horaire**, on offre de la **puissance (MW)**. Chaque période durant 1 heure, 1 MW dispatché = 1 MWh produit. Revenus = MW dispatchés × prix (€/MWh) × 1 heure.",
+        "merit_order_title": "Courbe d'Offre (Merit Order)",
+        "merit_order_x": "% Demande Couverte",
+        "merit_order_y": "Prix (€/MWh)",
+        "table_company": "Entreprise",
+        "table_net_profit": "Bénéfice Net (€)",
+        "param_label": "Paramètre",
+        "final_merit_title": "📊 Courbe Merit Order - Historique",
+        "final_hour": "Heure",
     },
 }
 
 def t(key, **kwargs):
-    """Obtiene la traducción en el idioma activo."""
-    lang = st.session_state.get("idioma", "es")
-    text = TRADUCCIONES.get(lang, TRADUCCIONES["es"]).get(key, key)
+    lang = st.session_state.get("idioma", "en")
+    text = TRADUCCIONES.get(lang, TRADUCCIONES["en"]).get(key, key)
     if kwargs:
         text = text.format(**kwargs)
     return text
 
 
-# --- MEMORIA COMPARTIDA (BASE DE DATOS EN MEMORIA) ---
+# --- MEMORIA COMPARTIDA ---
 @st.cache_resource
 def obtener_base_de_datos():
     return {"salas": {}}
@@ -252,11 +279,16 @@ HORARIOS = [
 # 📊 GRÁFICO MERIT ORDER
 # ==========================================
 def grafico_merit_order(df_resultado, demanda_residual, precio_marginal):
+    """
+    Dibuja la curva de oferta (merit order) con:
+    - Nombre de cada equipo encima de su(s) columna(s)
+    - Soporte correcto para precios negativos
+    """
     DICT_NOMBRES_EMOJIS = {
-        "Nuclear": "Nuclear ⚛️",
-        "Carbón": "Carbón ⚫",
+        "Nuclear":         "Nuclear ⚛️",
+        "Carbón":          "Carbón ⚫",
         "Ciclo Combinado": "Ciclo ☁",
-        "Gas": "Gas ♨",
+        "Gas":             "Gas ♨",
     }
     COLORES_TECH = {
         "Nuclear ⚛️": "#62ff3b",
@@ -266,60 +298,99 @@ def grafico_merit_order(df_resultado, demanda_residual, precio_marginal):
     }
 
     df_sorted = df_resultado.sort_values("Precio (€/MWh)").reset_index(drop=True)
-    df_sorted["Tecnología"] = df_sorted["Tecnología"].map(lambda x: DICT_NOMBRES_EMOJIS.get(x, x))
-    df_sorted = df_sorted[df_sorted["Potencia Ofertada (MW)"] > 0]
+    df_sorted["Tecnología"] = df_sorted["Tecnología"].map(
+        lambda x: DICT_NOMBRES_EMOJIS.get(x, x)
+    )
+    df_sorted = df_sorted[df_sorted["Potencia Ofertada (MW)"] > 0].copy()
 
     if df_sorted.empty:
         fig, ax = plt.subplots(figsize=(10, 5))
-        ax.text(0.5, 0.5, "Nadie ofertó potencia.\nMercado desierto.",
+        ax.text(0.5, 0.5, "No power was offered.\nEmpty market.",
                 ha='center', va='center', fontsize=15, color="red")
         ax.axis('off')
         return fig
 
-    total_ofertado = df_sorted["Potencia Ofertada (MW)"].sum()
+    total_ofertado      = df_sorted["Potencia Ofertada (MW)"].sum()
+    min_precio_ofertado = df_sorted["Precio (€/MWh)"].min()
     max_precio_ofertado = df_sorted["Precio (€/MWh)"].max()
-    if pd.isna(max_precio_ofertado):
-        max_precio_ofertado = 0
 
-    max_price_display = max(180, precio_marginal * 1.3, max_precio_ofertado * 1.1)
+    # Límites del eje Y: soporte para precios negativos
+    y_min = min(0, min_precio_ofertado * 1.3 if min_precio_ofertado < 0 else 0)
+    y_max = max(180, precio_marginal * 1.3 if precio_marginal > 0 else 180,
+                max_precio_ofertado * 1.1 if max_precio_ofertado > 0 else 180)
+
     COLOR_EJES = "#7c7c7c"
     COLOR_GRID = "#e8e8e8"
 
-    fig, ax = plt.subplots(figsize=(10, 5))
+    fig, ax = plt.subplots(figsize=(11, 5.5))
     fig.patch.set_facecolor("#FFFFFF")
     ax.set_facecolor("#FFFFFF")
 
     cumulative = 0
     labels_agregadas = set()
 
+    # Para anotar el equipo encima de la columna
+    # Agrupamos por equipo el rango x acumulado
+    equipo_x_ranges = {}  # equipo -> (x_start_min, x_end_max, precio_max)
+
     for _, row in df_sorted.iterrows():
-        tech  = row["Tecnología"]
-        mw    = row["Potencia Ofertada (MW)"]
-        price = row["Precio (€/MWh)"]
+        tech   = row["Tecnología"]
+        mw     = row["Potencia Ofertada (MW)"]
+        price  = row["Precio (€/MWh)"]
+        equipo = row["Equipo"]
 
         x_start = (cumulative / demanda_residual) * 100
         x_width = (mw / demanda_residual) * 100
+        x_end   = x_start + x_width
 
-        if x_start < 100:
-            color = COLORES_TECH.get(tech, "#F5B731")
-            label_leyenda = tech if tech not in labels_agregadas else None
-            labels_agregadas.add(tech)
-        else:
-            color = "#f3f3f3"
-            label_leyenda = None
+        color = COLORES_TECH.get(tech, "#F5B731") if x_start < 100 else "#f3f3f3"
+        label_leyenda = tech if (tech not in labels_agregadas and x_start < 100) else None
+        labels_agregadas.add(tech)
+
+        # Rectángulo con soporte para precios negativos:
+        # bottom = min(0, price), height = abs(price)
+        rect_bottom = min(0, price)
+        rect_height = abs(price) if price != 0 else 0.5  # evitar altura 0
 
         rect = plt.Rectangle(
-            (x_start, 0), x_width, price,
+            (x_start, rect_bottom), x_width, rect_height,
             facecolor=color, edgecolor="white", linewidth=1,
             zorder=2, label=label_leyenda
         )
         ax.add_patch(rect)
+
+        # Acumular rango x por equipo
+        if equipo not in equipo_x_ranges:
+            equipo_x_ranges[equipo] = [x_start, x_end, price]
+        else:
+            equipo_x_ranges[equipo][0] = min(equipo_x_ranges[equipo][0], x_start)
+            equipo_x_ranges[equipo][1] = max(equipo_x_ranges[equipo][1], x_end)
+            equipo_x_ranges[equipo][2] = max(equipo_x_ranges[equipo][2], price)
+
         cumulative += mw
 
-    ax.fill_between([0, 100], 0, precio_marginal, color="#FEFCE8", alpha=0.9, zorder=0)
+    # Línea de precio marginal (horizontal en precio_marginal, vertical en 100%)
+    ax.fill_between([0, 100], y_min, precio_marginal, color="#FEFCE8", alpha=0.6, zorder=0)
     ax.hlines(precio_marginal, 0, 100, colors="#1E3A8A", linestyles="--", linewidth=1.5, zorder=4)
-    ax.vlines(100, 0, precio_marginal, colors="#1E3A8A", linestyles="--", linewidth=1.5, zorder=4)
+    ax.vlines(100, y_min, precio_marginal, colors="#1E3A8A", linestyles="--", linewidth=1.5, zorder=4)
     ax.plot(100, precio_marginal, "o", color="#fc0303", markersize=8, zorder=5)
+
+    # Línea en y=0 si hay precios negativos
+    if y_min < 0:
+        ax.hlines(0, 0, (total_ofertado / demanda_residual) * 100,
+                  colors="#888888", linestyles="-", linewidth=0.8, zorder=3)
+
+    # Anotar nombre de equipo encima de su bloque
+    for equipo, (x0, x1, price_top) in equipo_x_ranges.items():
+        x_center = (x0 + x1) / 2
+        y_top = max(price_top, 0) + (y_max - y_min) * 0.03
+        ax.text(
+            x_center, y_top, equipo,
+            ha='center', va='bottom', fontsize=8, fontweight='bold',
+            color='#1e3a8a', zorder=7,
+            bbox=dict(boxstyle='round,pad=0.2', facecolor='white',
+                      edgecolor='#1e3a8a', alpha=0.8, linewidth=0.7)
+        )
 
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
@@ -328,19 +399,24 @@ def grafico_merit_order(df_resultado, demanda_residual, precio_marginal):
 
     x_limit = max(110, (total_ofertado / demanda_residual) * 100)
     ax.set_xlim(-1, x_limit)
-    ax.set_ylim(0, max_price_display)
+    ax.set_ylim(y_min, y_max)
 
     ax.xaxis.set_major_locator(ticker.MultipleLocator(50))
     ax.xaxis.set_major_formatter(ticker.PercentFormatter())
     ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%d€'))
     ax.grid(axis='y', linestyle='-', color=COLOR_GRID, linewidth=0.5, zorder=1)
 
-    ax.text(101, precio_marginal + (max_price_display * 0.02),
+    ax.set_xlabel(t("merit_order_x"), fontsize=10, color=COLOR_EJES)
+    ax.set_ylabel(t("merit_order_y"), fontsize=10, color=COLOR_EJES)
+    ax.set_title(t("merit_order_title"), fontsize=12, fontweight='bold', color='#1e3a8a')
+
+    offset_label = (y_max - y_min) * 0.02
+    ax.text(101, precio_marginal + offset_label,
             f"{precio_marginal:,.2f} €",
             fontsize=10, color="#1E3A8A", ha='left', va='bottom',
             fontweight="bold", zorder=6)
 
-    ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.12),
+    ax.legend(loc='upper center', bbox_to_anchor=(0.5, -0.14),
               ncol=4, frameon=False, fontsize=10, handlelength=1.5)
 
     plt.tight_layout()
@@ -348,24 +424,20 @@ def grafico_merit_order(df_resultado, demanda_residual, precio_marginal):
 
 
 # ==========================================
-# 🔀 ENRUTADOR: DETERMINAR ROL Y SALA
+# 🔀 ENRUTADOR
 # ==========================================
-params = st.query_params
-sala_url  = params.get("sala",  None)
-equipo_url = params.get("equipo", None)   # ← NUEVO: para reconexión automática
+params     = st.query_params
+sala_url   = params.get("sala",   None)
+equipo_url = params.get("equipo", None)
 
 if sala_url:
-    st.session_state.rol = "jugador"
-    st.session_state.sala_activa = sala_url
+    st.session_state.rol          = "jugador"
+    st.session_state.sala_activa  = sala_url
 
-    # ─── RECONEXIÓN AUTOMÁTICA POR URL ───────────────────────────────────────
-    # Si el jugador tiene ?sala=X&equipo=Y en la URL y aún no tiene sesión,
-    # intentamos restaurarla automáticamente.
     if equipo_url and "mi_equipo" not in st.session_state:
         sala_tmp = db["salas"].get(sala_url, {})
         if equipo_url in sala_tmp.get("equipos", []):
             st.session_state.mi_equipo = equipo_url
-            # Sincronizar idioma desde la sala
             if "idioma" in sala_tmp:
                 st.session_state.idioma = sala_tmp["idioma"]
 else:
@@ -378,28 +450,49 @@ else:
 # ==========================================
 if st.session_state.rol == "host":
 
-    # --- PASO 0: ELEGIR IDIOMA Y CREAR SALA ---
+    # ── PASO 0: ELEGIR IDIOMA (pantalla exclusiva) ────────────────────────────
+    if "idioma" not in st.session_state:
+        st.markdown(
+            f"<h1 style='text-align:center;margin-top:60px;'>⚡ Electricity Market Simulator</h1>",
+            unsafe_allow_html=True,
+        )
+        st.markdown(
+            "<p style='text-align:center;color:#6b7280;font-size:1.1rem;'>"
+            "Choose the game language &nbsp;|&nbsp; Elige el idioma &nbsp;|&nbsp; Choisissez la langue"
+            "</p>",
+            unsafe_allow_html=True,
+        )
+        st.markdown("<div style='margin-top:30px;'></div>", unsafe_allow_html=True)
+
+        col_en, col_es, col_fr = st.columns(3)
+        with col_en:
+            if st.button("🇬🇧\n\nEnglish", use_container_width=True, type="primary"):
+                st.session_state.idioma = "en"
+                st.rerun()
+        with col_es:
+            if st.button("🇪🇸\n\nEspañol", use_container_width=True, type="primary"):
+                st.session_state.idioma = "es"
+                st.rerun()
+        with col_fr:
+            if st.button("🇫🇷\n\nFrançais", use_container_width=True, type="primary"):
+                st.session_state.idioma = "fr"
+                st.rerun()
+        st.stop()
+
+    # ── PASO 1: CREAR SALA ────────────────────────────────────────────────────
     if "sala_activa" not in st.session_state:
-        st.title("⚡ Simulador de Mercado Eléctrico")
+        st.title("⚡ " + t("page_title"))
 
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
-            # Selector de idioma
-            lang_label = st.selectbox(
-                t("choose_language"),
-                options=list(LANG_OPTIONS.keys()),
-                index=0,
-            )
-            st.session_state.idioma = LANG_OPTIONS[lang_label]
-
             st.markdown(f"### {t('welcome_title')}")
 
             if st.button(t("generate_room"), type="primary", use_container_width=True):
                 nuevo_pin = str(random.randint(1000, 9999))
                 db["salas"][nuevo_pin] = {
-                    "estado": "esperando",
+                    "estado":  "esperando",
                     "equipos": [],
-                    "idioma": st.session_state.idioma,   # guardamos idioma en sala
+                    "idioma":  st.session_state.idioma,
                 }
                 st.session_state.sala_activa = nuevo_pin
                 st.rerun()
@@ -408,16 +501,15 @@ if st.session_state.rol == "host":
     sala_id = st.session_state.sala_activa
     sala    = db["salas"][sala_id]
 
-    # Sincronizar idioma desde la sala (por si el host recarga)
     if "idioma" in sala:
         st.session_state.idioma = sala["idioma"]
 
     estado_sala = sala["estado"]
 
-    # --- LOBBY DE ESPERA (HOST) ---
+    # ── LOBBY DE ESPERA (HOST) ────────────────────────────────────────────────
     if estado_sala == "esperando":
         st.title(t("waiting_room"))
-        URL_BASE = "https://simuladormercado2-tf9xg2yjxcjjfs5dufe6jl.streamlit.app"
+        URL_BASE       = "https://simuladormercado2-tf9xg2yjxcjjfs5dufe6jl.streamlit.app"
         url_invitacion = f"{URL_BASE}/?sala={sala_id}"
 
         col_izq, col_der = st.columns([1.2, 0.8])
@@ -455,49 +547,84 @@ if st.session_state.rol == "host":
                     "Ciclo Combinado": {"pot_max": int(800*factor), "coste_op": 121.0, "max_cambio": int(400*factor), "coste_cambio": 30,  "coste_pa": 10000},
                     "Gas":             {"pot_max": int(500*factor), "coste_op": 168.0, "max_cambio": int(500*factor), "coste_cambio": 0,   "coste_pa": 0},
                 }
-                sala["dinero_acumulado"]           = {eq: 500000 for eq in equipos_unidos}
-                sala["energia_acumulada"]           = {eq: {tech: 0 for tech in sala["TECNOLOGIAS"]} for eq in equipos_unidos}
-                sala["ronda_actual"]                = 0
-                sala["fase"]                        = "ofertando"
-                sala["ofertas"]                     = {}
-                sala["potencia_asignada_anterior"]  = {}
-                sala["hubo_apagon"]                 = False
+                sala["dinero_acumulado"]          = {eq: 500000 for eq in equipos_unidos}
+                sala["energia_acumulada"]          = {eq: {tech: 0 for tech in sala["TECNOLOGIAS"]} for eq in equipos_unidos}
+                sala["ronda_actual"]               = 0
+                sala["fase"]                       = "ofertando"
+                sala["ofertas"]                    = {}
+                sala["potencia_asignada_anterior"] = {}
+                sala["hubo_apagon"]                = False
+                sala["historico_resultados"]       = []   # ← para la gráfica final
                 st.rerun()
             else:
                 st.error(t("need_2_players"))
 
-    # --- JUEGO ACTIVO (HOST) ---
+    # ── JUEGO ACTIVO (HOST) ───────────────────────────────────────────────────
     elif estado_sala == "jugando":
         ronda = sala["ronda_actual"]
 
-        # FIN DE JUEGO
+        # ── FIN DE JUEGO ──────────────────────────────────────────────────────
         if ronda >= len(HORARIOS):
             st.success(t("final_results"))
             st.balloons()
-            st.markdown(f"<h1 style='text-align:center;'>{ t('final_ranking')}</h1>", unsafe_allow_html=True)
-            clasificacion = sorted(sala["dinero_acumulado"].items(), key=lambda x: x[1], reverse=True)
+            st.markdown(f"<h1 style='text-align:center;'>{t('final_ranking')}</h1>",
+                        unsafe_allow_html=True)
+
+            clasificacion = sorted(sala["dinero_acumulado"].items(),
+                                   key=lambda x: x[1], reverse=True)
             cols_lb  = st.columns(len(sala["equipos"]))
             medallas = t("medals")
             for i, (equipo_lb, saldo_lb) in enumerate(clasificacion):
                 with cols_lb[i]:
                     with st.container(border=True):
-                        st.markdown(f"<h3 style='text-align:center;'>{medallas[i]}</h3>", unsafe_allow_html=True)
-                        st.markdown(f"<h4 style='text-align:center;'>{equipo_lb}</h4>",   unsafe_allow_html=True)
+                        st.markdown(f"<h3 style='text-align:center;'>{medallas[i]}</h3>",
+                                    unsafe_allow_html=True)
+                        st.markdown(f"<h4 style='text-align:center;'>{equipo_lb}</h4>",
+                                    unsafe_allow_html=True)
                         color = "#28a745" if saldo_lb >= 0 else "#dc3545"
-                        st.markdown(f"<h2 style='text-align:center;color:{color};'>{saldo_lb:,.0f} €</h2>", unsafe_allow_html=True)
+                        st.markdown(
+                            f"<h2 style='text-align:center;color:{color};'>"
+                            f"{saldo_lb:,.0f} €</h2>",
+                            unsafe_allow_html=True,
+                        )
+
+            # ── GRÁFICAS MERIT ORDER HISTÓRICAS ───────────────────────────────
+            historico = sala.get("historico_resultados", [])
+            if historico:
+                st.markdown(f"## {t('final_merit_title')}")
+                for entrada in historico:
+                    st.markdown(f"**{t('final_hour')}: {entrada['hora']}**")
+                    df_h = pd.DataFrame(entrada["df_records"])
+                    fig_h = grafico_merit_order(
+                        df_h, entrada["demanda_residual"], entrada["precio_marginal"]
+                    )
+                    st.pyplot(fig_h)
+                    plt.close(fig_h)
+
+                    # Tabla beneficio por equipo en esa hora
+                    resumen_h = (
+                        df_h.groupby("Equipo")["Beneficio Neto (€)"]
+                        .sum()
+                        .reset_index()
+                        .rename(columns={
+                            "Equipo":            t("table_company"),
+                            "Beneficio Neto (€)": t("table_net_profit"),
+                        })
+                    )
+                    resumen_h[t("table_net_profit")] = resumen_h[
+                        t("table_net_profit")
+                    ].apply(lambda x: f"{x:,.0f} €")
+                    st.table(resumen_h.style.hide(axis="index"))
             st.stop()
 
-        datos_hora      = HORARIOS[ronda]
-        demanda_total   = datos_hora["demanda"]
-        renovables      = datos_hora["renovables"]
+        datos_hora       = HORARIOS[ronda]
+        demanda_total    = datos_hora["demanda"]
+        renovables       = datos_hora["renovables"]
         demanda_residual = demanda_total - renovables
-        pct_renovables  = (renovables / demanda_total) * 100
-        pct_residual    = 100 - pct_renovables
+        pct_renovables   = (renovables / demanda_total) * 100
+        pct_residual     = 100 - pct_renovables
 
         st.title(f"{t('ree_control')} | {datos_hora['hora']}")
-
-        # Nota pedagógica MW vs MWh
-        st.info(t("note_mw_mwh"))
 
         # Panel de demanda
         html_visual = f"""
@@ -528,10 +655,10 @@ if st.session_state.rol == "host":
 </div>"""
         st.markdown(html_visual, unsafe_allow_html=True)
 
-        # Tabla parámetros centrales
+        # Tabla parámetros centrales (traducida)
         with st.container():
             st.markdown(t("plant_params"))
-            datos_t = {"Parámetro": [t("max_power"), t("op_cost"), t("ramp_cost"), t("startup_cost")]}
+            datos_t = {t("param_label"): [t("max_power"), t("op_cost"), t("ramp_cost"), t("startup_cost")]}
             for tech, info in sala["TECNOLOGIAS"].items():
                 datos_t[tech] = [
                     f"{info['pot_max']} MW",
@@ -542,7 +669,7 @@ if st.session_state.rol == "host":
             df_host = pd.DataFrame(datos_t)
             st.table(df_host.style.hide(axis="index"))
 
-        # ── FASE: OFERTANDO ──────────────────────────────────────────────────
+        # ── FASE: OFERTANDO ───────────────────────────────────────────────────
         if sala["fase"] == "ofertando":
             ofertas_recibidas = len(sala["ofertas"])
             total_equipos     = len(sala["equipos"])
@@ -553,15 +680,15 @@ if st.session_state.rol == "host":
 
             st_autorefresh(interval=2000, key="refresh_host_ofertando")
 
-            # ── CAMBIO 2: solo se puede casar cuando TODOS han enviado ────────
             if not todas_enviadas:
-                st.warning(t("all_offers_required", received=ofertas_recibidas, total=total_equipos))
+                st.warning(t("all_offers_required",
+                             received=ofertas_recibidas, total=total_equipos))
 
             if st.button(
                 t("clear_market"),
                 type="primary",
                 use_container_width=True,
-                disabled=not todas_enviadas,          # ← BLOQUEADO hasta que todos envíen
+                disabled=not todas_enviadas,
             ):
                 todas_las_ofertas = []
                 for lista_equipo in sala["ofertas"].values():
@@ -587,14 +714,14 @@ if st.session_state.rol == "host":
                     else ofertas_aceptadas.iloc[-1]["Precio (€/MWh)"]
                 )
 
-                df["Ingresos (€)"]   = df["Potencia Asignada (MW)"] * precio_marginal
-                df["Costes Op (€)"]  = df["Potencia Asignada (MW)"] * df["Coste Op (€/MWh)"]
+                df["Ingresos (€)"]  = df["Potencia Asignada (MW)"] * precio_marginal
+                df["Costes Op (€)"] = df["Potencia Asignada (MW)"] * df["Coste Op (€/MWh)"]
 
                 if sala["ronda_actual"] == 0:
                     df["Penalización Cambio (€)"]          = 0
                     df["Penalización Parada/Arranque (€)"] = 0
                 else:
-                    df["Cambio Carga (MW)"]      = abs(df["Potencia Asignada (MW)"] - df["Potencia Anterior (MW)"])
+                    df["Cambio Carga (MW)"]       = abs(df["Potencia Asignada (MW)"] - df["Potencia Anterior (MW)"])
                     df["Penalización Cambio (€)"] = df["Cambio Carga (MW)"] * df["Coste Cambio (€/MW)"]
 
                     def calcular_pa(row):
@@ -626,17 +753,25 @@ if st.session_state.rol == "host":
                         sala["dinero_acumulado"][eq]  += row["Beneficio Neto (€)"]
                         sala["energia_acumulada"][eq][tech] += row["Potencia Asignada (MW)"]
 
-                sala["resultados_df"]  = df.to_dict("records")
+                    # Guardar en histórico para la gráfica final
+                    sala["historico_resultados"].append({
+                        "hora":             datos_hora["hora"],
+                        "demanda_residual": demanda_residual,
+                        "precio_marginal":  float(precio_marginal),
+                        "df_records":       df.to_dict("records"),
+                    })
+
+                sala["resultados_df"]   = df.to_dict("records")
                 sala["precio_marginal"] = float(precio_marginal)
                 sala["fase"]            = "resultados"
                 st.rerun()
 
-        # ── FASE: RESULTADOS (HOST) ───────────────────────────────────────────
+        # ── FASE: RESULTADOS (HOST) ────────────────────────────────────────────
         elif sala["fase"] == "resultados":
-            df_res   = pd.DataFrame(sala["resultados_df"])
-            fig_merit = grafico_merit_order(df_res, demanda_residual, sala["precio_marginal"])
-
             if sala["hubo_apagon"]:
+                df_res    = pd.DataFrame(sala["resultados_df"])
+                fig_merit = grafico_merit_order(df_res, demanda_residual, sala["precio_marginal"])
+
                 st.markdown(
                     "<h1 style='text-align:center;color:#ff0000;font-size:4em;'>"
                     f"{t('blackout_alert')}</h1>",
@@ -652,12 +787,10 @@ if st.session_state.rol == "host":
                     sala["hubo_apagon"] = False
                     st.rerun()
             else:
-                st.success(f"### {t('market_price')} {sala['precio_marginal']:,.2f} €/MWh")
-                st.pyplot(fig_merit)
-                plt.close(fig_merit)
-
-                resumen = df_res.groupby("Equipo")["Beneficio Neto (€)"].sum().reset_index()
-                st.table(resumen.style.hide(axis="index"))
+                # Solo mostrar precio de cierre (sin gráfica ni tabla de beneficios)
+                st.success(
+                    f"### {t('market_price')} **{sala['precio_marginal']:,.2f} €/MWh**"
+                )
 
                 if st.button(t("next_hour"), type="primary", use_container_width=True):
                     sala["ronda_actual"] += 1
@@ -679,11 +812,10 @@ if st.session_state.rol == "jugador":
     sala        = db["salas"][sala_id]
     estado_sala = sala["estado"]
 
-    # Sincronizar idioma del jugador con el de la sala
     if "idioma" in sala:
         st.session_state.idioma = sala["idioma"]
 
-    # ── REGISTRO / RECONEXIÓN ────────────────────────────────────────────────
+    # ── REGISTRO / RECONEXIÓN ─────────────────────────────────────────────────
     if estado_sala == "esperando":
         st.title(t("register_title"))
 
@@ -693,9 +825,6 @@ if st.session_state.rol == "jugador":
                 if nombre_equipo and nombre_equipo not in sala["equipos"]:
                     sala["equipos"].append(nombre_equipo)
                     st.session_state.mi_equipo = nombre_equipo
-                    # ── CAMBIO 1: guardamos el equipo en la URL ────────────────
-                    # Así si el móvil se desconecta, al reabrir la URL se
-                    # restaura la sesión automáticamente.
                     st.query_params["sala"]   = sala_id
                     st.query_params["equipo"] = nombre_equipo
                     st.rerun()
@@ -706,7 +835,6 @@ if st.session_state.rol == "jugador":
             st_autorefresh(interval=2000, key="refresh_jugador_lobby")
         st.stop()
 
-    # Partida ya en marcha pero sin sesión → reconexión manual
     elif estado_sala == "jugando" and "mi_equipo" not in st.session_state:
         st.title(t("reconnect_title"))
         st.info(t("reconnect_info"))
@@ -759,8 +887,6 @@ if st.session_state.rol == "jugador":
             st_autorefresh(interval=2000, key="refresh_jugador_esperando")
         else:
             st.subheader(t("prepare_offer"))
-            # Nota MW/MWh para el jugador
-            st.caption(t("note_mw_mwh"))
             mis_ofertas = []
 
             with st.form(key=f"form_oferta_{ronda}"):
@@ -801,7 +927,9 @@ if st.session_state.rol == "jugador":
                     })
                     st.divider()
 
-                enviado = st.form_submit_button(t("send_offer"), type="primary", use_container_width=True)
+                enviado = st.form_submit_button(
+                    t("send_offer"), type="primary", use_container_width=True
+                )
                 if enviado:
                     sala["ofertas"][mi_equipo] = mis_ofertas
                     st.rerun()
@@ -855,7 +983,7 @@ if st.session_state.rol == "jugador":
                         f"{r['Ingresos (€)']:,.0f} €",
                         f"{r['Costes Op (€)']:,.0f} €",
                         f"{penalizaciones:,.0f} €",
-                        f"{r['Beneficio Neto (€)']:,.0f} €",
+                        f"{r['Beneficio Neto (€)']:,.0f} €",   # ← sin decimales
                     ]
                 else:
                     data_dict[tech_disp] = ["0 MW", "— €/MWh", "0 MW", "—", "0 €", "0 €", "0 €", "0 €"]
@@ -864,13 +992,13 @@ if st.session_state.rol == "jugador":
 
             def aplicar_colores(row):
                 concepto = row["Concepto"]
-                if t("offer_power_mw")    in concepto or t("offer_price")     in concepto:
+                if t("offer_power_mw") in concepto or t("offer_price") in concepto:
                     est = "background-color:#dbeafe;color:#1e3a8a;"
-                elif t("sold_power_mw")   in concepto or t("income")          in concepto:
+                elif t("sold_power_mw") in concepto or t("income") in concepto:
                     est = "background-color:#dcfce7;color:#166534;"
-                elif t("op_costs")        in concepto or t("penalties")       in concepto:
+                elif t("op_costs") in concepto or t("penalties") in concepto:
                     est = "background-color:#fee2e2;color:#991b1b;"
-                elif t("net_profit")      in concepto:
+                elif t("net_profit") in concepto:
                     est = "background-color:#16a34a;color:white;font-weight:bold;"
                 else:
                     est = ""
