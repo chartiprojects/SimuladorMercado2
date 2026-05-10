@@ -94,6 +94,11 @@ TRADUCCIONES = {
         "param_label": "Parámetro",
         "final_merit_title": "📊 Curva Merit Order - Histórico",
         "final_hour": "Hora",
+        # Nombres de tecnología
+        "tech_Nuclear":         "Nuclear ⚛️",
+        "tech_Coal":            "Carbón ⚫",
+        "tech_CombinedCycle":   "Ciclo Combinado ☁️",
+        "tech_Gas":             "Gas ♨️",
     },
     "en": {
         "page_title": "Electricity Market Simulator",
@@ -171,6 +176,11 @@ TRADUCCIONES = {
         "param_label": "Parameter",
         "final_merit_title": "📊 Merit Order Curve - History",
         "final_hour": "Hour",
+        # Technology names
+        "tech_Nuclear":         "Nuclear ⚛️",
+        "tech_Coal":            "Coal ⚫",
+        "tech_CombinedCycle":   "Combined Cycle ☁️",
+        "tech_Gas":             "Gas ♨️",
     },
     "fr": {
         "page_title": "Simulateur Marché Électrique",
@@ -248,6 +258,11 @@ TRADUCCIONES = {
         "param_label": "Paramètre",
         "final_merit_title": "📊 Courbe Merit Order - Historique",
         "final_hour": "Heure",
+        # Noms des technologies
+        "tech_Nuclear":         "Nucléaire ⚛️",
+        "tech_Coal":            "Charbon ⚫",
+        "tech_CombinedCycle":   "Cycle Combiné ☁️",
+        "tech_Gas":             "Gaz ♨️",
     },
 }
 
