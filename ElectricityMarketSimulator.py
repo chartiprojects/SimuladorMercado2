@@ -429,14 +429,14 @@ def grafico_merit_order(df_resultado, demanda_residual, precio_marginal):
     DICT_TECH_LEGEND = TECH_LEGEND.get(lang, TECH_LEGEND["en"])
 
     COLORES_TECH = {
-        "Nuclear ⚛️":       "#62ff3b",
+        "Nuclear ⚛️":       "#4ade80",
         "Coal ⚫":           "#4e4859",
         "Carbón ⚫":         "#4e4859",
         "Charbon ⚫":        "#4e4859",
         "Comb. Cycle ☁":    "#322fc4",
         "Ciclo ☁":          "#322fc4",
         "Cycle Combiné ☁":  "#322fc4",
-        "Nucléaire ⚛️":     "#62ff3b",
+        "Nucléaire ⚛️":     "#4ade80",
         "Gas ♨":             "#f7b10c",
         "Gaz ♨":             "#f7b10c",
     }
@@ -599,11 +599,15 @@ if st.session_state.rol == "host":
     # ── PASO 0: ELEGIR IDIOMA (pantalla exclusiva, todo en inglés) ────────────
     if "idioma" not in st.session_state:
         st.markdown(
-            "<h1 style='text-align:center;margin-top:60px;'>⚡ Electricity Market Simulator</h1>",
+            "<h1 style='text-align:center;margin-top:60px;color:#111827;'>"
+            "⚡ Electricity Market Simulator</h1>"
+            "<p style='text-align:center;color:#9ca3af;font-size:1rem;"
+            "letter-spacing:0.05em;margin-top:-10px;margin-bottom:8px;'>"
+            "LEARN HOW POWER MARKETS WORK</p>",
             unsafe_allow_html=True,
         )
         st.markdown(
-            "<p style='text-align:center;color:#6b7280;font-size:1.2rem;margin-bottom:40px;'>"
+            "<p style='text-align:center;color:#6b7280;font-size:1rem;margin-bottom:40px;'>"
             "Choose the language for this game session"
             "</p>",
             unsafe_allow_html=True,
@@ -638,7 +642,12 @@ if st.session_state.rol == "host":
 
     # ── PASO 1: CREAR SALA ────────────────────────────────────────────────────
     if "sala_activa" not in st.session_state:
-        st.title("⚡ " + t("page_title"))
+        st.markdown(
+            f"<h1>⚡ {t('page_title')}</h1>"
+            "<p style='color:#9ca3af;font-size:0.85rem;letter-spacing:0.08em;"
+            "margin-top:-15px;margin-bottom:25px;'>LEARN HOW POWER MARKETS WORK</p>",
+            unsafe_allow_html=True,
+        )
 
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
