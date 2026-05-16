@@ -642,8 +642,15 @@ if st.session_state.rol == "host":
 
     # ── PASO 1: CREAR SALA ────────────────────────────────────────────────────
     if "sala_activa" not in st.session_state:
-        st.title("⚡ " + t("page_title"))
-
+        st.markdown(
+            f"<h1>⚡ {t('page_title')}</h1>"
+            "<p style='color:#9ca3af;font-size:0.85rem;letter-spacing:0.08em;"
+            "margin-top:-15px;margin-bottom:25px;'>LEARN HOW POWER MARKETS WORK</p>",
+            unsafe_allow_html=True,
+        )
+        col1, col2, col3 = st.columns([1, 2, 1])
+        with col2:
+            st.markdown(f"### {t('welcome_title')}")
             if st.button(t("generate_room"), type="primary", use_container_width=True):
                 nuevo_pin = str(random.randint(1000, 9999))
                 db["salas"][nuevo_pin] = {
