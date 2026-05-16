@@ -396,7 +396,7 @@ def grafico_merit_order(df_resultado, demanda_residual, precio_marginal):
 
     cumulative = 0
     labels_agregadas = set()
-    equipo_x_ranges = {}  # equipo -> [x_start_min, x_end_max, price_max]
+    y_range = y_max - y_min
 
     for _, row in df_sorted.iterrows():
         tech_leg = row["_tech_legend"]
@@ -406,13 +406,12 @@ def grafico_merit_order(df_resultado, demanda_residual, precio_marginal):
 
         x_start = (cumulative / demanda_residual) * 100
         x_width = (mw / demanda_residual) * 100
-        x_end   = x_start + x_width
 
-        color = COLORES_TECH.get(tech_leg, "#F5B731") if x_start < 100 else "#f3f3f3"
-        label_leyenda = tech_leg if (tech_leg not in labels_agregadas and x_start < 100) else None
+        within_demand = x_start < 100
+        color = COLORES_TECH.get(tech_leg, "#F5B731") if within_demand else "#f3f3f3"
+        label_leyenda = tech_leg if (tech_leg not in labels_agregadas and within_demand) else None
         labels_agregadas.add(tech_leg)
 
-        # Soporte precios negativos: bottom = min(0, price), height = abs(price)
         rect_bottom = min(0, price)
         rect_height = abs(price) if price != 0 else 0.5
 
@@ -423,13 +422,31 @@ def grafico_merit_order(df_resultado, demanda_residual, precio_marginal):
         )
         ax.add_patch(rect)
 
-        # Acumular rango x por equipo para la etiqueta
-        if equipo not in equipo_x_ranges:
-            equipo_x_ranges[equipo] = [x_start, x_end, price]
-        else:
-            equipo_x_ranges[equipo][0] = min(equipo_x_ranges[equipo][0], x_start)
-            equipo_x_ranges[equipo][1] = max(equipo_x_ranges[equipo][1], x_end)
-            equipo_x_ranges[equipo][2] = max(equipo_x_ranges[equipo][2], price)
+        # ── Etiqueta del equipo: dentro de la barra si cabe, encima si no ──
+        if within_demand and x_width > 1.5:
+            cx = x_start + x_width / 2
+            bar_h = abs(price)  # altura visual de la barra
+
+            if bar_h > y_range * 0.10:
+                # Cabe dentro: texto blanco centrado verticalmente, rotado
+                cy = rect_bottom + bar_h / 2
+                ax.text(
+                    cx, cy, equipo,
+                    ha='center', va='center',
+                    fontsize=6.5, fontweight='bold',
+                    color='white', rotation=90,
+                    zorder=7, clip_on=True,
+                )
+            else:
+                # Barra baja: texto pequeño justo encima de la barra
+                cy = max(price, 0) + y_range * 0.025
+                ax.text(
+                    cx, cy, equipo,
+                    ha='center', va='bottom',
+                    fontsize=6, fontweight='bold',
+                    color='#1e3a8a', rotation=90,
+                    zorder=7, clip_on=True,
+                )
 
         cumulative += mw
 
@@ -736,10 +753,10 @@ if st.session_state.rol == "host":
             datos_t = {t("param_label"): [t("max_power"), t("op_cost"), t("ramp_cost"), t("startup_cost")]}
             for tech, info in sala["TECNOLOGIAS"].items():
                 datos_t[tech_display(tech)] = [
-                    f"{info['pot_max']} MW",
-                    f"{info['coste_op']} €/MWh",
-                    f"{info['coste_cambio']} €/MW",
-                    f"{info['coste_pa']:,} €",
+                    f"{info['pot_max']} ",
+                    f"{info['coste_op']} ",
+                    f"{info['coste_cambio']} ",
+                    f"{info['coste_pa']:,} ",
                 ]
             df_host = pd.DataFrame(datos_t)
             st.table(df_host.style.hide(axis="index"))
