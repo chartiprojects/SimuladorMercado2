@@ -461,18 +461,6 @@ def grafico_merit_order(df_resultado, demanda_residual, precio_marginal):
         ax.hlines(0, 0, (total_ofertado / demanda_residual) * 100,
                   colors="#888888", linestyles="-", linewidth=0.8, zorder=3)
 
-    # Etiqueta del equipo encima de su bloque
-    for equipo, (x0, x1, price_top) in equipo_x_ranges.items():
-        x_center = (x0 + x1) / 2
-        y_top = max(price_top, 0) + (y_max - y_min) * 0.03
-        ax.text(
-            x_center, y_top, equipo,
-            ha='center', va='bottom', fontsize=8, fontweight='bold',
-            color='#1e3a8a', zorder=7,
-            bbox=dict(boxstyle='round,pad=0.2', facecolor='white',
-                      edgecolor='#1e3a8a', alpha=0.8, linewidth=0.7)
-        )
-
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     ax.spines["left"].set_color(COLOR_EJES)
