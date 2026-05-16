@@ -641,6 +641,18 @@ if st.session_state.rol == "host":
 
     # ── JUEGO ACTIVO (HOST) ───────────────────────────────────────────────────
     elif estado_sala == "jugando":
+
+        # ── SIDEBAR: QRs de reconexión individuales ───────────────────────
+        with st.sidebar:
+            st.markdown("### 🔌 Reconnection QRs")
+            st.caption("Show this to a player who disconnected.")
+            for eq in sala["equipos"]:
+                url_eq = f"https://simuladormercado2-tf9xg2yjxcjjfs5dufe6jl.streamlit.app/?sala={sala_id}&equipo={eq}"
+                with st.expander(f"📱 {eq}"):
+                    qr_eq = qrcode.make(url_eq)
+                    st.image(qr_eq.get_image(), width=180)
+                    st.code(url_eq, language=None)
+
         ronda = sala["ronda_actual"]
 
         # ── FIN DE JUEGO ──────────────────────────────────────────────────────
