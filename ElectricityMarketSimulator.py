@@ -314,8 +314,85 @@ TECH_DISPLAY = {
 def tech_display(tech_internal):
     lang = st.session_state.get("idioma", "en")
     return TECH_DISPLAY.get(lang, TECH_DISPLAY["en"]).get(tech_internal, tech_internal)
+# ==========================================
+# 📊 GRÁFICO BLACKOUT
+# ==========================================
+def grafico_blackout(df_resultado, demanda_residual):
+    """
+    Gráfica simplificada para el apagón:
+    barras grises anónimas, sin nombres ni tecnologías,
+    solo muestra cuánto se ofertó vs la demanda a cubrir.
+    """
+    df_sorted = df_resultado[df_resultado["Potencia Ofertada (MW)"] > 0].copy()
+    df_sorted = df_sorted.sort_values("Precio (€/MWh)").reset_index(drop=True)
 
+    if df_sorted.empty:
+        fig, ax = plt.subplots(figsize=(10, 4))
+        ax.text(0.5, 0.5, "No offers submitted.", ha='center', va='center',
+                fontsize=15, color="red")
+        ax.axis('off')
+        return fig
 
+    total_ofertado = df_sorted["Potencia Ofertada (MW)"].sum()
+    max_price      = df_sorted["Precio (€/MWh)"].max()
+    y_max          = max(180, max_price * 1.15)
+    COLOR_EJES     = "#7c7c7c"
+
+    fig, ax = plt.subplots(figsize=(11, 4.5))
+    fig.patch.set_facecolor("#FFFFFF")
+    ax.set_facecolor("#FFFFFF")
+
+    cumulative = 0
+    for _, row in df_sorted.iterrows():
+        mw    = row["Potencia Ofertada (MW)"]
+        price = row["Precio (€/MWh)"]
+
+        x_start = (cumulative / demanda_residual) * 100
+        x_width = (mw / demanda_residual) * 100
+
+        rect = plt.Rectangle(
+            (x_start, 0), x_width, max(price, 0.5),
+            facecolor="#9ca3af", edgecolor="white", linewidth=1, zorder=2
+        )
+        ax.add_patch(rect)
+        cumulative += mw
+
+    # Línea de demanda (100%) — lo que había que cubrir
+    ax.vlines(100, 0, y_max, colors="#dc2626", linestyles="-", linewidth=2.5, zorder=5)
+    ax.text(101, y_max * 0.85, t("to_cover"),
+            fontsize=9, color="#dc2626", ha='left', fontweight='bold')
+
+    # Cuánto se ofertó realmente
+    pct_ofertado = (total_ofertado / demanda_residual) * 100
+    ax.vlines(pct_ofertado, 0, y_max * 0.6,
+              colors="#f59e0b", linestyles="--", linewidth=2, zorder=4)
+    ax.text(pct_ofertado + 1, y_max * 0.62,
+            f"{pct_ofertado:.0f}%",
+            fontsize=9, color="#f59e0b", ha='left', fontweight='bold')
+
+    # Zona roja del "hueco"
+    if pct_ofertado < 100:
+        ax.axvspan(pct_ofertado, 100, alpha=0.15, color="#dc2626", zorder=1)
+
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+    ax.spines["left"].set_color(COLOR_EJES)
+    ax.spines["bottom"].set_color(COLOR_EJES)
+
+    x_limit = max(115, pct_ofertado + 15)
+    ax.set_xlim(-1, x_limit)
+    ax.set_ylim(0, y_max)
+
+    ax.xaxis.set_major_locator(ticker.MultipleLocator(25))
+    ax.xaxis.set_major_formatter(ticker.PercentFormatter())
+    ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%d€'))
+    ax.grid(axis='y', linestyle='-', color="#e8e8e8", linewidth=0.5, zorder=1)
+
+    ax.set_xlabel(t("merit_order_x"), fontsize=10, color=COLOR_EJES)
+    ax.set_ylabel(t("merit_order_y"), fontsize=10, color=COLOR_EJES)
+
+    plt.tight_layout()
+    return fig
 # ==========================================
 # 📊 GRÁFICO MERIT ORDER
 # ==========================================
@@ -641,6 +718,18 @@ if st.session_state.rol == "host":
 
     # ── JUEGO ACTIVO (HOST) ───────────────────────────────────────────────────
     elif estado_sala == "jugando":
+
+        # ── SIDEBAR: QRs de reconexión individuales ───────────────────────
+        with st.sidebar:
+            st.markdown("### 🔌 Reconnection QRs")
+            st.caption("Show this to a player who disconnected.")
+            for eq in sala["equipos"]:
+                url_eq = f"https://simuladormercado2-tf9xg2yjxcjjfs5dufe6jl.streamlit.app/?sala={sala_id}&equipo={eq}"
+                with st.expander(f"📱 {eq}"):
+                    qr_eq = qrcode.make(url_eq)
+                    st.image(qr_eq.get_image(), width=180)
+                    st.code(url_eq, language=None)
+
         ronda = sala["ronda_actual"]
 
         # ── FIN DE JUEGO ──────────────────────────────────────────────────────
@@ -850,7 +939,7 @@ if st.session_state.rol == "host":
         elif sala["fase"] == "resultados":
             if sala["hubo_apagon"]:
                 df_res    = pd.DataFrame(sala["resultados_df"])
-                fig_merit = grafico_merit_order(df_res, demanda_residual, sala["precio_marginal"])
+                fig_merit = grafico_blackout(df_res, demanda_residual)
 
                 st.markdown(
                     "<h1 style='text-align:center;color:#ff0000;font-size:4em;'>"
