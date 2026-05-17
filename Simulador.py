@@ -1033,6 +1033,7 @@ if st.session_state.rol == "host":
                 plt.close(fig_merit)
 
                 if st.button(t("redo_offers"), type="primary"):
+                    sala["ofertas_apagon"] = sala.get("resultados_df", [])  # keep failed offers as seed
                     sala["fase"]        = "ofertando"
                     sala["ofertas"]     = {}
                     sala["hubo_apagon"] = False
@@ -1046,6 +1047,7 @@ if st.session_state.rol == "host":
                     sala["ronda_actual"] += 1
                     sala["fase"]         = "ofertando"
                     sala["ofertas"]      = {}
+                    sala["ofertas_apagon"] = {}
                     st.rerun()
 
 
@@ -1165,6 +1167,12 @@ if st.session_state.rol == "jugador":
             st.subheader(t("prepare_offer"))
             mis_ofertas = []
 
+            # Build a lookup of the failed blackout offers for this player (if any)
+            apagon_lookup = {}
+            for row in sala.get("ofertas_apagon", []):
+                if isinstance(row, dict) and row.get("Equipo") == mi_equipo:
+                    apagon_lookup[row["Tecnología"]] = row
+
             with st.form(key=f"form_oferta_{ronda}"):
                 for tech, info in sala["TECNOLOGIAS"].items():
                     clave_historial = f"{mi_equipo}_{tech}"
@@ -1179,15 +1187,23 @@ if st.session_state.rol == "jugador":
                             min_sl = int(max(0, pot_anterior - info["max_cambio"]))
                             max_sl = int(min(info["pot_max"], pot_anterior + info["max_cambio"]))
 
+                        # Default: use the failed blackout offer if available, else pot_anterior
+                        if tech in apagon_lookup:
+                            pot_default = int(apagon_lookup[tech]["Potencia Ofertada (MW)"])
+                            pot_default = max(min_sl, min(max_sl, pot_default))
+                        else:
+                            pot_default = int(pot_anterior) if pot_anterior >= min_sl else min_sl
+
                         pot = st.slider(
                             f"MW – {tech_display(tech)}", min_sl, max_sl,
-                            int(pot_anterior) if pot_anterior >= min_sl else min_sl,
-                            step=10
+                            pot_default,
+                            step=1
                         )
                     with col2:
+                        apagon_price = float(apagon_lookup[tech]["Precio (€/MWh)"]) if tech in apagon_lookup else float(info["coste_op"])
                         pre = st.number_input(
                             f"€/MWh – {tech_display(tech)}",
-                            value=float(info["coste_op"]),
+                            value=apagon_price,
                             step=1.0
                         )
 
