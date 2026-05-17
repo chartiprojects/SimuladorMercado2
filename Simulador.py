@@ -15,7 +15,7 @@ st.set_page_config(page_title="Electricity Market Simulator", layout="wide")
 # ==========================================
 # 🌐 SISTEMA DE TRADUCCIONES
 # ==========================================
-LANG_OPTIONS = {"🇬🇧 English": "en", "🇪🇸 Español": "es", "🇫🇷 Français": "fr"}
+LANG_OPTIONS = {"🇬🇧 English": "en", "🇪🇸 Español": "es", "🇫🇷 Français": "fr", "🇩🇪 Deutsch": "de"}
 
 TRADUCCIONES = {
     "es": {
@@ -92,6 +92,7 @@ TRADUCCIONES = {
         "table_company": "Empresa",
         "table_net_profit": "Beneficio Neto (€)",
         "param_label": "Parámetro",
+        "concept_label": "",
         "final_merit_title": "📊 Curva Merit Order - Histórico",
         "final_hour": "Hora",
         # Nombres de tecnología
@@ -174,6 +175,7 @@ TRADUCCIONES = {
         "table_company": "Company",
         "table_net_profit": "Net Profit (€)",
         "param_label": "Parameter",
+        "concept_label": "",
         "final_merit_title": "📊 Merit Order Curve - History",
         "final_hour": "Hour",
         # Technology names
@@ -256,6 +258,7 @@ TRADUCCIONES = {
         "table_company": "Entreprise",
         "table_net_profit": "Bénéfice Net (€)",
         "param_label": "Paramètre",
+        "concept_label": "",
         "final_merit_title": "📊 Courbe Merit Order - Historique",
         "final_hour": "Heure",
         # Noms des technologies
@@ -263,6 +266,89 @@ TRADUCCIONES = {
         "tech_Coal":            "Charbon ⚫",
         "tech_CombinedCycle":   "Cycle Combiné ☁️",
         "tech_Gas":             "Gaz ♨️",
+    },
+    "de": {
+        "page_title": "Strommarkt-Simulator",
+        "language_screen_title": "⚡ Electricity Market Simulator",
+        "language_screen_subtitle": "Choose the game language / Elige el idioma / Choisissez la langue",
+        "welcome_title": "⚡ Willkommen! Sie sind der Marktbetreiber (ÜNB)",
+        "choose_language": "🌐 Spielsprache wählen:",
+        "generate_room": "👥 Raum erstellen",
+        "waiting_room": "⚡ Warteraum",
+        "scan_to_join": "### 📲 Scannen zum Mitmachen!",
+        "registered_companies": "Registrierte Unternehmen:",
+        "waiting_connections": "Warte auf Verbindungen...",
+        "start_game": "🚀 Spiel starten",
+        "need_2_players": "Es werden mindestens 2 Unternehmen benötigt!",
+        "operator_name": "ÜNB",
+        "ree_control": "⚡ ÜNB - Zentrale Steuerung",
+        "demand": "🏭 NACHFRAGE",
+        "renewables": "🌱 ERNEUERN.",
+        "to_cover": "⚡ ZU DECKEN",
+        "plant_params": "**📋 Kraftwerksparameter**",
+        "max_power": "Maximale Leistung (MW)",
+        "op_cost": "Betriebskosten (€/MWh)",
+        "ramp_cost": "Rampenkosten (€/MW)",
+        "startup_cost": "An-/Abfahrkosten (€)",
+        "companies_submitted": "Unternehmen, die Angebote eingereicht haben:",
+        "clear_market": "⚖️ Markt räumen",
+        "all_offers_required": "⏳ Warte auf alle Angebote… ({received} von {total})",
+        "nobody_offered": "Noch niemand hat ein Angebot eingereicht.",
+        "blackout_alert": "🚨 BLACKOUT-ALARM! 🚨",
+        "blackout_msg": "Das Stromsystem steht kurz vor dem Zusammenbruch. Der Markt wurde annulliert.",
+        "redo_offers": "🔄 Neueinreichung erzwingen",
+        "market_price": "💰 Endgültiger Marktpreis:",
+        "next_hour": "⏭️ Zur nächsten Stunde",
+        "final_results": "🎉 Die Handelssitzung ist beendet! Hier sind die Endergebnisse.",
+        "final_ranking": "🏆 ENDRANGLISTE 🏆",
+        "medals": ["🥇 1. PLATZ", "🥈 2. PLATZ", "🥉 3. PLATZ", "🏅 4. PLATZ", "🏅 5. PLATZ"],
+        "register_title": "🏢 Unternehmensregistrierung",
+        "company_name": "Name Ihres Unternehmens:",
+        "accept": "Akzeptieren",
+        "invalid_name": "Ungültiger Name oder bereits vergeben.",
+        "registered_ok": "✅ Ihr Unternehmen **{nombre}** wurde registriert! Das Spiel beginnt bald…",
+        "late_arrival": "Sie sind zu spät, das Spiel hat bereits begonnen.",
+        "market_closed": "🎉 Der Markt hat für heute geschlossen!",
+        "check_screen": "Schauen Sie auf den Bildschirm des Lehrers für die Endrangliste.",
+        "hour_label": "STUNDE",
+        "demand_to_cover": "ZU DECKENDE NACHFRAGE (MW)",
+        "current_balance": "AKTUELLER KONTOSTAND:",
+        "prepare_offer": "📝 Angebot vorbereiten",
+        "previous_mw": "Vorherige: {mw} MW",
+        "offer_sent": "📤 Angebot an ÜNB übermittelt.",
+        "waiting_others": "Warten auf andere Unternehmen und den ÜNB zum Marktabschluss…",
+        "send_offer": "⚖️ Angebot einreichen",
+        "blackout_player": "🚨 BLACKOUT! Nachfrage nicht gedeckt. Bitte Angebot erneut einreichen.",
+        "market_cleared": "✅ Markt geräumt. Hier sind Ihre Ergebnisse:",
+        "offer_power_mw": "Angebot - Leistung (MW)",
+        "offer_price": "Angebot - Preis (€/MWh)",
+        "sold_power_mw": "Zugeteilt - Leistung (MW)",
+        "clearing_price_row": "Abrechnungspreis (€/MWh)",
+        "income": "Einnahmen (€)",
+        "op_costs": "Betriebskosten (€)",
+        "penalties": "Strafen (€)",
+        "net_profit": "Nettogewinn (€)",
+        "total_balance": "💵 GESAMTKONTOSTAND:",
+        "waiting_host": "Warten auf den Marktbetreiber für die nächste Stunde…",
+        "room_not_found": "❌ Dieser Raum existiert nicht oder das Spiel ist beendet.",
+        "reconnect_title": "🔄 Erneut verbinden",
+        "reconnect_info": "Ihre Sitzung wurde beendet. Geben Sie Ihren Unternehmensnamen ein:",
+        "reconnect_btn": "Erneut verbinden",
+        "reconnect_error": "Kein Unternehmen mit diesem Namen in diesem Raum gefunden.",
+        "merit_order_title": "Angebotskurve (Merit Order)",
+        "merit_order_x": "% Nachfrage gedeckt",
+        "merit_order_y": "Preis (€/MWh)",
+        "table_company": "Unternehmen",
+        "table_net_profit": "Nettogewinn (€)",
+        "param_label": "Parameter",
+        "concept_label": "",
+        "final_merit_title": "📊 Merit-Order-Kurve - Verlauf",
+        "final_hour": "Stunde",
+        # Technologienamen
+        "tech_Nuclear":         "Kernkraft ⚛️",
+        "tech_Coal":            "Kohle ⚫",
+        "tech_CombinedCycle":   "GuD-Kraftwerk ☁️",
+        "tech_Gas":             "Gas ♨️",
     },
 }
 
@@ -309,6 +395,12 @@ TECH_DISPLAY = {
         "Ciclo Combinado": "💨 Cycle Combiné",
         "Gas":             "🔥 Gaz",
     },
+    "de": {
+        "Nuclear":         "☢️ Kernkraft",
+        "Carbón":          "🪨 Kohle",
+        "Ciclo Combinado": "💨 GuD-Kraftwerk",
+        "Gas":             "🔥 Gas",
+    },
 }
 
 def tech_display(tech_internal):
@@ -318,11 +410,6 @@ def tech_display(tech_internal):
 # 📊 GRÁFICO BLACKOUT
 # ==========================================
 def grafico_blackout(df_resultado, demanda_residual):
-    """
-    Gráfica simplificada para el apagón:
-    barras grises anónimas, sin nombres ni tecnologías,
-    solo muestra cuánto se ofertó vs la demanda a cubrir.
-    """
     df_sorted = df_resultado[df_resultado["Potencia Ofertada (MW)"] > 0].copy()
     df_sorted = df_sorted.sort_values("Precio (€/MWh)").reset_index(drop=True)
 
@@ -357,12 +444,10 @@ def grafico_blackout(df_resultado, demanda_residual):
         ax.add_patch(rect)
         cumulative += mw
 
-    # Línea de demanda (100%) — lo que había que cubrir
     ax.vlines(100, 0, y_max, colors="#dc2626", linestyles="-", linewidth=2.5, zorder=5)
     ax.text(101, y_max * 0.85, t("to_cover"),
             fontsize=9, color="#dc2626", ha='left', fontweight='bold')
 
-    # Cuánto se ofertó realmente
     pct_ofertado = (total_ofertado / demanda_residual) * 100
     ax.vlines(pct_ofertado, 0, y_max * 0.6,
               colors="#f59e0b", linestyles="--", linewidth=2, zorder=4)
@@ -370,7 +455,6 @@ def grafico_blackout(df_resultado, demanda_residual):
             f"{pct_ofertado:.0f}%",
             fontsize=9, color="#f59e0b", ha='left', fontweight='bold')
 
-    # Zona roja del "hueco"
     if pct_ofertado < 100:
         ax.axvspan(pct_ofertado, 100, alpha=0.15, color="#dc2626", zorder=1)
 
@@ -397,15 +481,8 @@ def grafico_blackout(df_resultado, demanda_residual):
 # 📊 GRÁFICO MERIT ORDER
 # ==========================================
 def grafico_merit_order(df_resultado, demanda_residual, precio_marginal):
-    """
-    Dibuja la curva de oferta (merit order) con:
-    - Nombre de cada equipo encima de su(s) columna(s)
-    - Soporte correcto para precios negativos
-    - Labels de tecnología traducidos
-    """
     lang = st.session_state.get("idioma", "en")
 
-    # Internal tech name → translated display name for legend
     TECH_LEGEND = {
         "es": {
             "Nuclear":         "Nuclear ⚛️",
@@ -425,6 +502,12 @@ def grafico_merit_order(df_resultado, demanda_residual, precio_marginal):
             "Ciclo Combinado": "Cycle Combiné ☁",
             "Gas":             "Gaz ♨",
         },
+        "de": {
+            "Nuclear":         "Kernkraft ⚛️",
+            "Carbón":          "Kohle ⚫",
+            "Ciclo Combinado": "GuD-Kraftwerk ☁",
+            "Gas":             "Gas ♨",
+        },
     }
     DICT_TECH_LEGEND = TECH_LEGEND.get(lang, TECH_LEGEND["en"])
 
@@ -433,10 +516,13 @@ def grafico_merit_order(df_resultado, demanda_residual, precio_marginal):
         "Coal ⚫":           "#4e4859",
         "Carbón ⚫":         "#4e4859",
         "Charbon ⚫":        "#4e4859",
+        "Kohle ⚫":          "#4e4859",
         "Comb. Cycle ☁":    "#322fc4",
         "Ciclo ☁":          "#322fc4",
         "Cycle Combiné ☁":  "#322fc4",
+        "GuD-Kraftwerk ☁":  "#322fc4",
         "Nucléaire ⚛️":     "#62ff3b",
+        "Kernkraft ⚛️":     "#62ff3b",
         "Gas ♨":             "#f7b10c",
         "Gaz ♨":             "#f7b10c",
     }
@@ -459,7 +545,6 @@ def grafico_merit_order(df_resultado, demanda_residual, precio_marginal):
     min_precio_ofertado = df_sorted["Precio (€/MWh)"].min()
     max_precio_ofertado = df_sorted["Precio (€/MWh)"].max()
 
-    # Límites eje Y con soporte para precios negativos
     y_min = min(0, min_precio_ofertado * 1.3 if min_precio_ofertado < 0 else 0)
     y_max = max(180, precio_marginal * 1.3 if precio_marginal > 0 else 180,
                 max_precio_ofertado * 1.1 if max_precio_ofertado > 0 else 180)
@@ -499,13 +584,11 @@ def grafico_merit_order(df_resultado, demanda_residual, precio_marginal):
         )
         ax.add_patch(rect)
 
-        # ── Etiqueta del equipo: dentro de la barra si cabe, encima si no ──
         if within_demand and x_width > 1.5:
             cx = x_start + x_width / 2
-            bar_h = abs(price)  # altura visual de la barra
+            bar_h = abs(price)
 
             if bar_h > y_range * 0.10:
-                # Cabe dentro: texto blanco centrado verticalmente, rotado
                 cy = rect_bottom + bar_h / 2
                 ax.text(
                     cx, cy, equipo,
@@ -515,7 +598,6 @@ def grafico_merit_order(df_resultado, demanda_residual, precio_marginal):
                     zorder=7, clip_on=True,
                 )
             else:
-                # Barra baja: texto pequeño justo encima de la barra
                 cy = max(price, 0) + y_range * 0.025
                 ax.text(
                     cx, cy, equipo,
@@ -527,13 +609,11 @@ def grafico_merit_order(df_resultado, demanda_residual, precio_marginal):
 
         cumulative += mw
 
-    # Línea de precio marginal
     ax.fill_between([0, 100], y_min, precio_marginal, color="#FEFCE8", alpha=0.6, zorder=0)
     ax.hlines(precio_marginal, 0, 100, colors="#1E3A8A", linestyles="--", linewidth=1.5, zorder=4)
     ax.vlines(100, y_min, precio_marginal, colors="#1E3A8A", linestyles="--", linewidth=1.5, zorder=4)
     ax.plot(100, precio_marginal, "o", color="#fc0303", markersize=8, zorder=5)
 
-    # Línea en y=0 si hay precios negativos
     if y_min < 0:
         ax.hlines(0, 0, (total_ofertado / demanda_residual) * 100,
                   colors="#888888", linestyles="-", linewidth=0.8, zorder=3)
@@ -596,7 +676,7 @@ else:
 # ==========================================
 if st.session_state.rol == "host":
 
-    # ── PASO 0: ELEGIR IDIOMA (pantalla exclusiva, todo en inglés) ────────────
+    # ── PASO 0: ELEGIR IDIOMA ─────────────────────────────────────────────────
     if "idioma" not in st.session_state:
         st.markdown(
             "<h1 style='text-align:center;margin-top:60px;'>⚡ Electricity Market Simulator</h1>",
@@ -609,7 +689,7 @@ if st.session_state.rol == "host":
             unsafe_allow_html=True,
         )
 
-        col_en, col_es, col_fr = st.columns(3)
+        col_en, col_es, col_fr, col_de = st.columns(4)
         with col_en:
             st.markdown(
                 "<div style='text-align:center;font-size:4rem;line-height:1;'>🇬🇧</div>",
@@ -633,6 +713,14 @@ if st.session_state.rol == "host":
             )
             if st.button("Français", use_container_width=True, type="primary"):
                 st.session_state.idioma = "fr"
+                st.rerun()
+        with col_de:
+            st.markdown(
+                "<div style='text-align:center;font-size:4rem;line-height:1;'>🇩🇪</div>",
+                unsafe_allow_html=True,
+            )
+            if st.button("Deutsch", use_container_width=True, type="primary"):
+                st.session_state.idioma = "de"
                 st.rerun()
         st.stop()
 
@@ -719,7 +807,6 @@ if st.session_state.rol == "host":
     # ── JUEGO ACTIVO (HOST) ───────────────────────────────────────────────────
     elif estado_sala == "jugando":
 
-        # ── SIDEBAR: QRs de reconexión individuales ───────────────────────
         with st.sidebar:
             st.markdown("### 🔌 Reconnection QRs")
             st.caption("Show this to a player who disconnected.")
@@ -757,7 +844,6 @@ if st.session_state.rol == "host":
                             unsafe_allow_html=True,
                         )
 
-            # ── GRÁFICAS MERIT ORDER HISTÓRICAS ───────────────────────────────
             historico = sala.get("historico_resultados", [])
             if historico:
                 st.markdown(f"## {t('final_merit_title')}")
@@ -770,7 +856,6 @@ if st.session_state.rol == "host":
                     st.pyplot(fig_h)
                     plt.close(fig_h)
 
-                    # Tabla beneficio por equipo en esa hora (traducida)
                     resumen_h = (
                         df_h.groupby("Equipo")["Beneficio Neto (€)"]
                         .sum()
@@ -795,7 +880,6 @@ if st.session_state.rol == "host":
 
         st.title(f"{t('ree_control')} | {datos_hora['hora']}")
 
-        # Panel de demanda
         html_visual = f"""
 <div style="background-color:#fffbeb;padding:10px;border-radius:10px;border:2px solid #f59e0b;
             margin-bottom:5px;box-shadow:1px 1px 3px rgba(0,0,0,0.05);">
@@ -824,7 +908,6 @@ if st.session_state.rol == "host":
 </div>"""
         st.markdown(html_visual, unsafe_allow_html=True)
 
-        # Tabla parámetros centrales (traducida)
         with st.container():
             st.markdown(t("plant_params"))
             datos_t = {t("param_label"): [t("max_power"), t("op_cost"), t("ramp_cost"), t("startup_cost")]}
@@ -922,7 +1005,6 @@ if st.session_state.rol == "host":
                         sala["dinero_acumulado"][eq]  += row["Beneficio Neto (€)"]
                         sala["energia_acumulada"][eq][tech] += row["Potencia Asignada (MW)"]
 
-                    # Guardar en histórico para la gráfica final
                     sala["historico_resultados"].append({
                         "hora":             datos_hora["hora"],
                         "demanda_residual": demanda_residual,
@@ -956,7 +1038,6 @@ if st.session_state.rol == "host":
                     sala["hubo_apagon"] = False
                     st.rerun()
             else:
-                # Solo mostrar precio de cierre (sin gráfica ni tabla de beneficios)
                 st.success(
                     f"### {t('market_price')} **{sala['precio_marginal']:,.2f} €/MWh**"
                 )
@@ -1005,11 +1086,9 @@ if st.session_state.rol == "jugador":
         st.stop()
 
     elif estado_sala == "jugando" and "mi_equipo" not in st.session_state:
-        # ── PANTALLA DE RECONEXIÓN ─────────────────────────────────────────────
         st.title(t("reconnect_title"))
         st.info(t("reconnect_info"))
 
-        # Mostrar QR para facilitar el reingreso con el mismo enlace de sala
         URL_BASE       = "https://simuladormercado2-tf9xg2yjxcjjfs5dufe6jl.streamlit.app"
         url_sala       = f"{URL_BASE}/?sala={sala_id}"
         st.markdown("**Scan to return to this room:**")
@@ -1039,7 +1118,6 @@ if st.session_state.rol == "jugador":
     datos_hora       = HORARIOS[ronda]
     demanda_residual = datos_hora["demanda"] - datos_hora["renovables"]
 
-    # FIX #2: Sin mensaje informativo MW/MWh — solo título y hora/demanda
     st.title(f"🏢 {mi_equipo}")
 
     col_hora, col_demanda = st.columns(2)
@@ -1092,7 +1170,6 @@ if st.session_state.rol == "jugador":
                     clave_historial = f"{mi_equipo}_{tech}"
                     pot_anterior    = sala["potencia_asignada_anterior"].get(clave_historial, 0)
 
-                    # Nombre de tecnología traducido en el formulario
                     st.markdown(f"**🔌 {tech_display(tech)}** ({t('previous_mw', mw=int(pot_anterior))})")
                     col1, col2 = st.columns(2)
                     with col1:
@@ -1116,7 +1193,7 @@ if st.session_state.rol == "jugador":
 
                     mis_ofertas.append({
                         "Equipo":                  mi_equipo,
-                        "Tecnología":              tech,   # siempre interno para el motor
+                        "Tecnología":              tech,
                         "Potencia Ofertada (MW)":  pot,
                         "Precio (€/MWh)":          pre,
                         "Coste Op (€/MWh)":        info["coste_op"],
@@ -1147,8 +1224,9 @@ if st.session_state.rol == "jugador":
 
             tecnologias_orden = ["Nuclear", "Carbón", "Ciclo Combinado", "Gas"]
 
+            # "concept_label" is an empty string → first column header will be blank
             data_dict = {
-                "Concepto": [
+                t("concept_label"): [
                     t("offer_power_mw"),
                     t("offer_price"),
                     t("sold_power_mw"),
@@ -1184,7 +1262,7 @@ if st.session_state.rol == "jugador":
             df_display = pd.DataFrame(data_dict)
 
             def aplicar_colores(row):
-                concepto = row["Concepto"]
+                concepto = row[t("concept_label")]
                 if t("offer_power_mw") in concepto or t("offer_price") in concepto:
                     est = "background-color:#dbeafe;color:#1e3a8a;"
                 elif t("sold_power_mw") in concepto or t("income") in concepto:
