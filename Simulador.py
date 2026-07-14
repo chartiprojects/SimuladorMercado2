@@ -22,7 +22,7 @@ TRADUCCIONES = {
         "page_title": "Simulador Mercado Eléctrico",
         "language_screen_title": "⚡ Electricity Market Simulator",
         "language_screen_subtitle": "Choose the game language / Elige el idioma / Choisissez la langue",
-        "welcome_title": "⚡ ¡Bienvenido! Eres el operador del mercado (REE)",
+        "welcome_title": "⚡ ¡Bienvenido! Eres el operador del mercado (OMIE)",
         "choose_language": "🌐 Elige el idioma de la partida:",
         "generate_room": "👥 Generar Sala",
         "waiting_room": "⚡ Sala de Espera",
