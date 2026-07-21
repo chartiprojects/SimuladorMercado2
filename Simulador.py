@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
 import numpy as np
 import matplotlib.ticker as ticker
+import time
 
 # streamlit run SimuladorEquipos.py
 
@@ -95,6 +96,23 @@ TRADUCCIONES = {
         "concept_label": "",
         "final_merit_title": "📊 Curva Merit Order - Histórico",
         "final_hour": "Hora",
+        # ── Temporizador ──
+        "timer_setup": "⏱️ Duración de la fase de ofertas (minutos)",
+        "timer_help": "Los jugadores verán la cuenta atrás. Al llegar a 0 el mercado NO se cierra solo: lo cierras tú.",
+        "time_left": "⏳ TIEMPO RESTANTE",
+        "time_up": "⏰ ¡TIEMPO AGOTADO!",
+        "time_up_host": "⏰ El tiempo ha terminado. Cierra el mercado cuando lo veas oportuno.",
+        "force_close": "🔒 Cerrar mercado ahora (forzar casación)",
+        "force_close_help": "Casa el mercado aunque falten empresas por ofertar. Las que no hayan enviado oferta se contarán como 0 MW.",
+        "force_close_warning": "⚠️ Se ha forzado el cierre. Empresas sin oferta (contadas como 0 MW): {equipos}",
+        # ── Blackout sin info de precios ──
+        "blackout_coverage": "COBERTURA DE LA DEMANDA",
+        "blackout_missing": "FALTA POR CUBRIR",
+        "blackout_offered": "Ofertado por el conjunto de empresas",
+        # ── Apagar instalación ──
+        "shutdown_label": "⛔ Apagar esta central (0 MW)",
+        "shutdown_active": "⛔ Central APAGADA — ofertará 0 MW",
+        "shutdown_help": "Apagar tiene coste de parada, pero te permite bajar a 0 MW saltándote el límite de rampa.",
         # Nombres de tecnología
         "tech_Nuclear":         "Nuclear ⚛️",
         "tech_Coal":            "Carbón ⚫",
@@ -178,6 +196,23 @@ TRADUCCIONES = {
         "concept_label": "",
         "final_merit_title": "📊 Merit Order Curve - History",
         "final_hour": "Hour",
+        # ── Timer ──
+        "timer_setup": "⏱️ Bidding phase duration (minutes)",
+        "timer_help": "Players will see the countdown. When it reaches 0 the market does NOT close by itself: you close it.",
+        "time_left": "⏳ TIME REMAINING",
+        "time_up": "⏰ TIME IS UP!",
+        "time_up_host": "⏰ Time is up. Close the market whenever you see fit.",
+        "force_close": "🔒 Close market now (force clearing)",
+        "force_close_help": "Clears the market even if some companies haven't submitted. Missing offers count as 0 MW.",
+        "force_close_warning": "⚠️ Closing was forced. Companies without offers (counted as 0 MW): {equipos}",
+        # ── Blackout without price info ──
+        "blackout_coverage": "DEMAND COVERAGE",
+        "blackout_missing": "STILL UNCOVERED",
+        "blackout_offered": "Offered by all companies combined",
+        # ── Shutdown ──
+        "shutdown_label": "⛔ Shut down this plant (0 MW)",
+        "shutdown_active": "⛔ Plant SHUT DOWN — will offer 0 MW",
+        "shutdown_help": "Shutting down has a stop cost, but lets you go to 0 MW bypassing the ramp limit.",
         # Technology names
         "tech_Nuclear":         "Nuclear ⚛️",
         "tech_Coal":            "Coal ⚫",
@@ -261,6 +296,23 @@ TRADUCCIONES = {
         "concept_label": "",
         "final_merit_title": "📊 Courbe Merit Order - Historique",
         "final_hour": "Heure",
+        # ── Minuteur ──
+        "timer_setup": "⏱️ Durée de la phase d'offres (minutes)",
+        "timer_help": "Les joueurs verront le compte à rebours. À 0, le marché ne se ferme PAS tout seul : c'est vous qui le fermez.",
+        "time_left": "⏳ TEMPS RESTANT",
+        "time_up": "⏰ TEMPS ÉCOULÉ !",
+        "time_up_host": "⏰ Le temps est écoulé. Fermez le marché quand vous le jugez opportun.",
+        "force_close": "🔒 Fermer le marché maintenant (forcer)",
+        "force_close_help": "Équilibre le marché même si des entreprises n'ont pas soumis. Les offres manquantes comptent comme 0 MW.",
+        "force_close_warning": "⚠️ Fermeture forcée. Entreprises sans offre (comptées 0 MW) : {equipos}",
+        # ── Coupure sans info de prix ──
+        "blackout_coverage": "COUVERTURE DE LA DEMANDE",
+        "blackout_missing": "RESTE À COUVRIR",
+        "blackout_offered": "Offert par l'ensemble des entreprises",
+        # ── Arrêt ──
+        "shutdown_label": "⛔ Arrêter cette centrale (0 MW)",
+        "shutdown_active": "⛔ Centrale ARRÊTÉE — offrira 0 MW",
+        "shutdown_help": "L'arrêt a un coût, mais permet de descendre à 0 MW en contournant la limite de modulation.",
         # Noms des technologies
         "tech_Nuclear":         "Nucléaire ⚛️",
         "tech_Coal":            "Charbon ⚫",
@@ -344,6 +396,23 @@ TRADUCCIONES = {
         "concept_label": "",
         "final_merit_title": "📊 Merit-Order-Kurve - Verlauf",
         "final_hour": "Stunde",
+        # ── Timer ──
+        "timer_setup": "⏱️ Dauer der Angebotsphase (Minuten)",
+        "timer_help": "Die Spieler sehen den Countdown. Bei 0 schließt der Markt NICHT automatisch: Sie schließen ihn.",
+        "time_left": "⏳ VERBLEIBENDE ZEIT",
+        "time_up": "⏰ ZEIT ABGELAUFEN!",
+        "time_up_host": "⏰ Die Zeit ist abgelaufen. Schließen Sie den Markt, wann immer Sie möchten.",
+        "force_close": "🔒 Markt jetzt schließen (erzwingen)",
+        "force_close_help": "Räumt den Markt, auch wenn Angebote fehlen. Fehlende Angebote zählen als 0 MW.",
+        "force_close_warning": "⚠️ Schließung erzwungen. Unternehmen ohne Angebot (als 0 MW gezählt): {equipos}",
+        # ── Blackout ohne Preisinfo ──
+        "blackout_coverage": "NACHFRAGEDECKUNG",
+        "blackout_missing": "NOCH UNGEDECKT",
+        "blackout_offered": "Von allen Unternehmen zusammen angeboten",
+        # ── Abschalten ──
+        "shutdown_label": "⛔ Dieses Kraftwerk abschalten (0 MW)",
+        "shutdown_active": "⛔ Kraftwerk ABGESCHALTET — bietet 0 MW",
+        "shutdown_help": "Abschalten kostet, erlaubt aber 0 MW unter Umgehung der Rampengrenze.",
         # Technologienamen
         "tech_Nuclear":         "Kernkraft ⚛️",
         "tech_Coal":            "Kohle ⚫",
@@ -410,73 +479,74 @@ def tech_display(tech_internal):
 # 📊 GRÁFICO BLACKOUT
 # ==========================================
 def grafico_blackout(df_resultado, demanda_residual):
-    df_sorted = df_resultado[df_resultado["Potencia Ofertada (MW)"] > 0].copy()
-    df_sorted = df_sorted.sort_values("Precio (€/MWh)").reset_index(drop=True)
+    """Gráfico de apagón SIN información de precios.
 
-    if df_sorted.empty:
-        fig, ax = plt.subplots(figsize=(10, 4))
-        ax.text(0.5, 0.5, "No offers submitted.", ha='center', va='center',
-                fontsize=15, color="red")
-        ax.axis('off')
-        return fig
+    Durante el apagón los jugadores tienen que rehacer sus ofertas, así que
+    mostrar los precios ofertados por los rivales daría información indebida.
+    Sólo se muestra el % de demanda cubierta por el conjunto del mercado.
+    """
+    total_ofertado = float(df_resultado["Potencia Ofertada (MW)"].sum())
+    pct_cubierto   = (total_ofertado / demanda_residual) * 100 if demanda_residual else 0
+    pct_cubierto   = max(0.0, pct_cubierto)
+    pct_faltante   = max(0.0, 100 - pct_cubierto)
 
-    total_ofertado = df_sorted["Potencia Ofertada (MW)"].sum()
-    max_price      = df_sorted["Precio (€/MWh)"].max()
-    y_max          = max(180, max_price * 1.15)
-    COLOR_EJES     = "#7c7c7c"
+    COLOR_EJES = "#7c7c7c"
 
-    fig, ax = plt.subplots(figsize=(11, 4.5))
+    fig, ax = plt.subplots(figsize=(11, 2.6))
     fig.patch.set_facecolor("#FFFFFF")
     ax.set_facecolor("#FFFFFF")
 
-    cumulative = 0
-    for _, row in df_sorted.iterrows():
-        mw    = row["Potencia Ofertada (MW)"]
-        price = row["Precio (€/MWh)"]
+    # Fondo: la demanda total a cubrir (100 %)
+    ax.barh(0, 100, height=0.55, color="#fee2e2",
+            edgecolor="#dc2626", linewidth=1.5, zorder=2)
 
-        x_start = (cumulative / demanda_residual) * 100
-        x_width = (mw / demanda_residual) * 100
+    # Barra de lo realmente ofertado por el conjunto del mercado
+    ax.barh(0, min(pct_cubierto, 100), height=0.55,
+            color="#f59e0b", edgecolor="white", linewidth=0, zorder=3)
 
-        rect = plt.Rectangle(
-            (x_start, 0), x_width, max(price, 0.5),
-            facecolor="#9ca3af", edgecolor="white", linewidth=1, zorder=2
-        )
-        ax.add_patch(rect)
-        cumulative += mw
+    # Etiqueta del % cubierto dentro de la barra
+    if pct_cubierto > 12:
+        ax.text(min(pct_cubierto, 100) / 2, 0, f"{pct_cubierto:.1f} %",
+                ha="center", va="center", fontsize=16, fontweight="bold",
+                color="white", zorder=5)
+    else:
+        ax.text(min(pct_cubierto, 100) + 2, 0, f"{pct_cubierto:.1f} %",
+                ha="left", va="center", fontsize=16, fontweight="bold",
+                color="#b45309", zorder=5)
 
-    ax.vlines(100, 0, y_max, colors="#dc2626", linestyles="-", linewidth=2.5, zorder=5)
-    ax.text(101, y_max * 0.85, t("to_cover"),
-            fontsize=9, color="#dc2626", ha='left', fontweight='bold')
+    # Etiqueta del hueco que falta por cubrir
+    if pct_faltante > 0:
+        centro_hueco = pct_cubierto + pct_faltante / 2
+        if pct_faltante > 12:
+            ax.text(centro_hueco, 0, f"−{pct_faltante:.1f} %",
+                    ha="center", va="center", fontsize=15, fontweight="bold",
+                    color="#dc2626", zorder=5)
 
-    pct_ofertado = (total_ofertado / demanda_residual) * 100
-    ax.vlines(pct_ofertado, 0, y_max * 0.6,
-              colors="#f59e0b", linestyles="--", linewidth=2, zorder=4)
-    ax.text(pct_ofertado + 1, y_max * 0.62,
-            f"{pct_ofertado:.0f}%",
-            fontsize=9, color="#f59e0b", ha='left', fontweight='bold')
+    # Línea roja del 100 % de la demanda
+    ax.vlines(100, -0.45, 0.45, colors="#dc2626", linewidth=3, zorder=6)
+    ax.text(100, 0.55, t("to_cover") + " (100 %)", fontsize=10,
+            color="#dc2626", ha="right", va="bottom", fontweight="bold")
 
-    if pct_ofertado < 100:
-        ax.axvspan(pct_ofertado, 100, alpha=0.15, color="#dc2626", zorder=1)
+    ax.text(0, -0.62, t("blackout_offered"), fontsize=9,
+            color=COLOR_EJES, ha="left", va="top")
 
-    ax.spines["top"].set_visible(False)
-    ax.spines["right"].set_visible(False)
-    ax.spines["left"].set_color(COLOR_EJES)
-    ax.spines["bottom"].set_color(COLOR_EJES)
-
-    x_limit = max(115, pct_ofertado + 15)
-    ax.set_xlim(-1, x_limit)
-    ax.set_ylim(0, y_max)
-
+    ax.set_xlim(-1, 105)
+    ax.set_ylim(-0.9, 0.9)
+    ax.set_yticks([])
     ax.xaxis.set_major_locator(ticker.MultipleLocator(25))
     ax.xaxis.set_major_formatter(ticker.PercentFormatter())
-    ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%d€'))
-    ax.grid(axis='y', linestyle='-', color="#e8e8e8", linewidth=0.5, zorder=1)
+    ax.tick_params(axis="x", colors=COLOR_EJES)
+
+    for lado in ("top", "right", "left"):
+        ax.spines[lado].set_visible(False)
+    ax.spines["bottom"].set_color(COLOR_EJES)
 
     ax.set_xlabel(t("merit_order_x"), fontsize=10, color=COLOR_EJES)
-    ax.set_ylabel(t("merit_order_y"), fontsize=10, color=COLOR_EJES)
 
     plt.tight_layout()
     return fig
+
+
 # ==========================================
 # 📊 GRÁFICO MERIT ORDER
 # ==========================================
@@ -560,6 +630,11 @@ def grafico_merit_order(df_resultado, demanda_residual, precio_marginal):
     labels_agregadas = set()
     y_range = y_max - y_min
 
+    # Opacidad de las ofertas NO casadas: mismo color de tecnología pero apagado,
+    # para que se siga distinguiendo qué tecnología y qué empresa es cada bloque.
+    ALPHA_CASADO    = 1.0
+    ALPHA_NO_CASADO = 0.30
+
     for _, row in df_sorted.iterrows():
         tech_leg = row["_tech_legend"]
         mw       = row["Potencia Ofertada (MW)"]
@@ -568,25 +643,43 @@ def grafico_merit_order(df_resultado, demanda_residual, precio_marginal):
 
         x_start = (cumulative / demanda_residual) * 100
         x_width = (mw / demanda_residual) * 100
+        x_end   = x_start + x_width
 
-        within_demand = x_start < 100
-        color = COLORES_TECH.get(tech_leg, "#F5B731") if within_demand else "#f3f3f3"
-        label_leyenda = tech_leg if (tech_leg not in labels_agregadas and within_demand) else None
-        labels_agregadas.add(tech_leg)
+        color = COLORES_TECH.get(tech_leg, "#F5B731")
 
         rect_bottom = min(0, price)
         rect_height = abs(price) if price != 0 else 0.5
 
-        rect = plt.Rectangle(
-            (x_start, rect_bottom), x_width, rect_height,
-            facecolor=color, edgecolor="white", linewidth=1,
-            zorder=2, label=label_leyenda
-        )
-        ax.add_patch(rect)
+        # Una misma oferta puede quedar parcialmente casada (prorrateo o corte
+        # justo en el margen): se parte en dos tramos, uno vivo y otro apagado.
+        tramos = []
+        if x_end <= 100:
+            tramos.append((x_start, x_width, ALPHA_CASADO))
+        elif x_start >= 100:
+            tramos.append((x_start, x_width, ALPHA_NO_CASADO))
+        else:
+            tramos.append((x_start, 100 - x_start, ALPHA_CASADO))
+            tramos.append((100, x_end - 100, ALPHA_NO_CASADO))
 
-        if within_demand and x_width > 1.5:
-            cx = x_start + x_width / 2
-            bar_h = abs(price)
+        label_leyenda = tech_leg if tech_leg not in labels_agregadas else None
+        labels_agregadas.add(tech_leg)
+
+        for i, (tx, tw, talpha) in enumerate(tramos):
+            if tw <= 0:
+                continue
+            rect = plt.Rectangle(
+                (tx, rect_bottom), tw, rect_height,
+                facecolor=color, edgecolor="white", linewidth=1,
+                alpha=talpha, zorder=2,
+                label=label_leyenda if i == 0 else None,
+            )
+            ax.add_patch(rect)
+
+        # Etiqueta con el nombre de la empresa, también en las ofertas no casadas
+        if x_width > 1.5:
+            casado_mayoritario = (x_start + x_width / 2) < 100
+            cx     = x_start + x_width / 2
+            bar_h  = abs(price)
 
             if bar_h > y_range * 0.10:
                 cy = rect_bottom + bar_h / 2
@@ -594,8 +687,9 @@ def grafico_merit_order(df_resultado, demanda_residual, precio_marginal):
                     cx, cy, equipo,
                     ha='center', va='center',
                     fontsize=6.5, fontweight='bold',
-                    color='white', rotation=90,
-                    zorder=7, clip_on=True,
+                    color='white' if casado_mayoritario else '#374151',
+                    alpha=1.0 if casado_mayoritario else 0.75,
+                    rotation=90, zorder=7, clip_on=True,
                 )
             else:
                 cy = max(price, 0) + y_range * 0.025
@@ -603,8 +697,8 @@ def grafico_merit_order(df_resultado, demanda_residual, precio_marginal):
                     cx, cy, equipo,
                     ha='center', va='bottom',
                     fontsize=6, fontweight='bold',
-                    color='#1e3a8a', rotation=90,
-                    zorder=7, clip_on=True,
+                    color='#1e3a8a' if casado_mayoritario else '#9ca3af',
+                    rotation=90, zorder=7, clip_on=True,
                 )
 
         cumulative += mw
@@ -647,6 +741,167 @@ def grafico_merit_order(df_resultado, demanda_residual, precio_marginal):
 
     plt.tight_layout()
     return fig
+
+
+# ==========================================
+# ⏱️ TEMPORIZADOR DE LA FASE DE OFERTAS
+# ==========================================
+def iniciar_temporizador(sala):
+    """Marca el instante en el que arranca una nueva fase de ofertas."""
+    if sala.get("duracion_oferta_seg"):
+        sala["inicio_oferta_ts"] = time.time()
+    else:
+        sala["inicio_oferta_ts"] = None
+
+
+def segundos_restantes(sala):
+    """Segundos que quedan de la fase de ofertas.
+
+    Devuelve None si el host no configuró temporizador, y 0 si ya se agotó.
+    El mercado NUNCA se cierra solo al llegar a 0: sólo lo cierra el host.
+    """
+    duracion = sala.get("duracion_oferta_seg")
+    inicio   = sala.get("inicio_oferta_ts")
+    if not duracion or not inicio:
+        return None
+    return max(0.0, duracion - (time.time() - inicio))
+
+
+def rellenar_ofertas_faltantes(sala):
+    """Al forzar el cierre, las empresas que no han ofertado entran con 0 MW.
+
+    Devuelve la lista de nombres de esas empresas para poder avisar al host.
+    """
+    faltantes = []
+    for eq in sala["equipos"]:
+        if eq in sala["ofertas"]:
+            continue
+        faltantes.append(eq)
+        ofertas_cero = []
+        for tech, info in sala["TECNOLOGIAS"].items():
+            pot_anterior = sala["potencia_asignada_anterior"].get(f"{eq}_{tech}", 0)
+            ofertas_cero.append({
+                "Equipo":                 eq,
+                "Tecnología":             tech,
+                "Potencia Ofertada (MW)": 0,
+                "Precio (€/MWh)":         float(info["coste_op"]),
+                "Coste Op (€/MWh)":       info["coste_op"],
+                "Coste Cambio (€/MW)":    info["coste_cambio"],
+                "Coste P/A Fijo (€)":     info["coste_pa"],
+                "Potencia Anterior (MW)": pot_anterior,
+            })
+        sala["ofertas"][eq] = ofertas_cero
+    return faltantes
+
+
+# ==========================================
+# ⚖️ CASACIÓN DEL MERCADO
+# ==========================================
+def casar_mercado(sala, demanda_residual, datos_hora):
+    """Casa el mercado con precio marginal y PRORRATEO en el margen."""
+    todas_las_ofertas = []
+    for lista_equipo in sala["ofertas"].values():
+        todas_las_ofertas.extend(lista_equipo)
+
+    df = pd.DataFrame(todas_las_ofertas)
+    df = df.sort_values(by="Precio (€/MWh)").reset_index(drop=True)
+    df["Potencia Acumulada (MW)"] = df["Potencia Ofertada (MW)"].cumsum()
+
+    total_ofertado = df["Potencia Ofertada (MW)"].sum()
+
+    if total_ofertado <= 0:
+        # Nadie oferta potencia > 0: no hay precio marginal definido.
+        df["Potencia Asignada (MW)"] = 0.0
+        precio_marginal = float(df["Precio (€/MWh)"].min()) if not df.empty else 0.0
+    else:
+        # Precio marginal: precio de la oferta en la que la potencia acumulada
+        # alcanza (o supera) la demanda residual. Si no se llega a cubrir toda
+        # la demanda, el precio marginal es el de la oferta más cara (habrá apagón).
+        idx_marginales = df.index[df["Potencia Acumulada (MW)"] >= demanda_residual]
+        if len(idx_marginales) > 0:
+            precio_marginal = df.loc[idx_marginales[0], "Precio (€/MWh)"]
+        else:
+            precio_marginal = df["Precio (€/MWh)"].max()
+
+        # Todo lo estrictamente más barato que el precio marginal entra al 100%.
+        energia_mas_barata = df.loc[
+            df["Precio (€/MWh)"] < precio_marginal, "Potencia Ofertada (MW)"
+        ].sum()
+
+        # Las ofertas empatadas EXACTAMENTE al precio marginal se reparten
+        # por PRORRATEO proporcional a la cantidad ofertada por cada una
+        # (igual que hace OMIE/EUPHEMIA con las ofertas casadas en el margen).
+        mask_marginal      = df["Precio (€/MWh)"] == precio_marginal
+        qty_marginal_total = df.loc[mask_marginal, "Potencia Ofertada (MW)"].sum()
+        necesario_marginal = max(0.0, demanda_residual - energia_mas_barata)
+        necesario_marginal = min(necesario_marginal, qty_marginal_total)
+
+        factor_prorrateo = (
+            necesario_marginal / qty_marginal_total
+            if qty_marginal_total > 0 else 0.0
+        )
+
+        def calcular_asignacion(row):
+            if row["Precio (€/MWh)"] < precio_marginal:
+                return row["Potencia Ofertada (MW)"]
+            elif row["Precio (€/MWh)"] == precio_marginal:
+                return row["Potencia Ofertada (MW)"] * factor_prorrateo
+            else:
+                return 0.0
+
+        df["Potencia Asignada (MW)"] = df.apply(calcular_asignacion, axis=1)
+
+    df["Ingresos (€)"]  = df["Potencia Asignada (MW)"] * precio_marginal
+    df["Costes Op (€)"] = df["Potencia Asignada (MW)"] * df["Coste Op (€/MWh)"]
+
+    if sala["ronda_actual"] == 0:
+        df["Penalización Cambio (€)"]          = 0
+        df["Penalización Parada/Arranque (€)"] = 0
+    else:
+        df["Cambio Carga (MW)"]       = abs(df["Potencia Asignada (MW)"] - df["Potencia Anterior (MW)"])
+        df["Penalización Cambio (€)"] = df["Cambio Carga (MW)"] * df["Coste Cambio (€/MW)"]
+
+        def calcular_pa(row):
+            if row["Potencia Anterior (MW)"] == 0 and row["Potencia Asignada (MW)"] > 0:
+                return row["Coste P/A Fijo (€)"]
+            elif row["Potencia Anterior (MW)"] > 0 and row["Potencia Asignada (MW)"] == 0:
+                return row["Coste P/A Fijo (€)"]
+            return 0
+
+        df["Penalización Parada/Arranque (€)"] = df.apply(calcular_pa, axis=1)
+
+    df["Beneficio Neto (€)"] = (
+        df["Ingresos (€)"]
+        - df["Costes Op (€)"]
+        - df["Penalización Cambio (€)"]
+        - df["Penalización Parada/Arranque (€)"]
+    )
+
+    total_asignado = df["Potencia Asignada (MW)"].sum()
+    if total_asignado < demanda_residual:
+        sala["hubo_apagon"] = True
+    else:
+        sala["hubo_apagon"] = False
+        for _, row in df.iterrows():
+            eq    = row["Equipo"]
+            tech  = row["Tecnología"]
+            clave = f"{eq}_{tech}"
+            sala["potencia_asignada_anterior"][clave] = row["Potencia Asignada (MW)"]
+            sala["dinero_acumulado"][eq]  += row["Beneficio Neto (€)"]
+            sala["energia_acumulada"][eq][tech] += row["Potencia Asignada (MW)"]
+
+        sala["historico_resultados"].append({
+            "hora":             datos_hora["hora"],
+            "demanda_residual": demanda_residual,
+            "precio_marginal":  float(precio_marginal),
+            "df_records":       df.to_dict("records"),
+        })
+
+    sala["resultados_df"]   = df.to_dict("records")
+    sala["precio_marginal"] = float(precio_marginal)
+    sala["fase"]            = "resultados"
+    sala["inicio_oferta_ts"] = None
+    return df
 
 
 # ==========================================
@@ -782,6 +1037,13 @@ if st.session_state.rol == "host":
 
         st.markdown("<div style='margin-top:-20px;'></div>", unsafe_allow_html=True)
 
+        # ── CONFIGURACIÓN DEL TEMPORIZADOR ────────────────────────────────────
+        minutos_oferta = st.number_input(
+            t("timer_setup"),
+            min_value=0.0, max_value=30.0, value=3.0, step=0.5,
+            help=t("timer_help"),
+        )
+
         if st.button(t("start_game"), type="primary", use_container_width=True):
             if len(equipos_unidos) >= 2:
                 factor = 4 / len(equipos_unidos)
@@ -800,6 +1062,9 @@ if st.session_state.rol == "host":
                 sala["potencia_asignada_anterior"] = {}
                 sala["hubo_apagon"]                = False
                 sala["historico_resultados"]       = []
+                sala["duracion_oferta_seg"]        = int(minutos_oferta * 60)
+                sala["aviso_forzado"]              = None
+                iniciar_temporizador(sala)
                 st.rerun()
             else:
                 st.error(t("need_2_players"))
@@ -927,98 +1192,88 @@ if st.session_state.rol == "host":
             total_equipos     = len(sala["equipos"])
             todas_enviadas    = ofertas_recibidas == total_equipos
 
+            # ── TEMPORIZADOR ──────────────────────────────────────────────────
+            restante = segundos_restantes(sala)
+            if restante is not None:
+                if restante > 0:
+                    mins, segs = divmod(int(restante), 60)
+                    # Verde > 50 %, ámbar > 20 %, rojo por debajo
+                    total_seg = max(1, sala.get("duracion_oferta_seg", 1))
+                    frac      = restante / total_seg
+                    if frac > 0.5:
+                        col_bg, col_bd, col_tx = "#dcfce7", "#22c55e", "#166534"
+                    elif frac > 0.2:
+                        col_bg, col_bd, col_tx = "#fef3c7", "#f59e0b", "#b45309"
+                    else:
+                        col_bg, col_bd, col_tx = "#fee2e2", "#dc2626", "#991b1b"
+                    st.markdown(
+                        f"<div style='background-color:{col_bg};border:2px solid {col_bd};"
+                        f"border-radius:10px;padding:10px;text-align:center;margin-bottom:10px;'>"
+                        f"<span style='color:{col_tx};font-size:0.85rem;font-weight:bold;'>"
+                        f"{t('time_left')}</span><br>"
+                        f"<span style='color:{col_tx};font-size:2.6rem;font-weight:900;"
+                        f"font-family:monospace;'>{mins:02d}:{segs:02d}</span></div>",
+                        unsafe_allow_html=True,
+                    )
+                else:
+                    st.markdown(
+                        "<div style='background-color:#fee2e2;border:2px solid #dc2626;"
+                        "border-radius:10px;padding:10px;text-align:center;margin-bottom:10px;'>"
+                        f"<span style='color:#991b1b;font-size:2rem;font-weight:900;'>"
+                        f"{t('time_up')}</span></div>",
+                        unsafe_allow_html=True,
+                    )
+                    st.info(t("time_up_host"))
+
             st.metric(t("companies_submitted"), f"{ofertas_recibidas} de {total_equipos}")
             st.progress(ofertas_recibidas / total_equipos)
 
-            st_autorefresh(interval=2000, key="refresh_host_ofertando")
+            # Refresco cada segundo mientras corre el reloj, cada 2 s si no hay reloj
+            st_autorefresh(interval=1000 if restante is not None else 2000,
+                           key="refresh_host_ofertando")
 
             if not todas_enviadas:
                 st.warning(t("all_offers_required",
                              received=ofertas_recibidas, total=total_equipos))
 
-            if st.button(
-                t("clear_market"),
-                type="primary",
-                use_container_width=True,
-                disabled=not todas_enviadas,
-            ):
-                todas_las_ofertas = []
-                for lista_equipo in sala["ofertas"].values():
-                    todas_las_ofertas.extend(lista_equipo)
+            col_casar, col_forzar = st.columns([1, 1])
 
-                df = pd.DataFrame(todas_las_ofertas)
-                df = df.sort_values(by="Precio (€/MWh)").reset_index(drop=True)
-                df["Potencia Acumulada (MW)"] = df["Potencia Ofertada (MW)"].cumsum()
-                df["Potencia Previa (MW)"]    = df["Potencia Acumulada (MW)"] - df["Potencia Ofertada (MW)"]
+            with col_casar:
+                casar_normal = st.button(
+                    t("clear_market"),
+                    type="primary",
+                    use_container_width=True,
+                    disabled=not todas_enviadas,
+                )
+            with col_forzar:
+                forzar_cierre = st.button(
+                    t("force_close"),
+                    use_container_width=True,
+                    help=t("force_close_help"),
+                    disabled=todas_enviadas,
+                )
 
-                def calcular_asignacion(row):
-                    if row["Potencia Previa (MW)"] >= demanda_residual:
-                        return 0
-                    elif row["Potencia Acumulada (MW)"] <= demanda_residual:
-                        return row["Potencia Ofertada (MW)"]
+            if casar_normal or forzar_cierre:
+                faltantes = []
+                if forzar_cierre:
+                    faltantes = rellenar_ofertas_faltantes(sala)
+                    if faltantes:
+                        sala["aviso_forzado"] = t("force_close_warning",
+                                                  equipos=", ".join(faltantes))
                     else:
-                        return demanda_residual - row["Potencia Previa (MW)"]
-
-                df["Potencia Asignada (MW)"] = df.apply(calcular_asignacion, axis=1)
-                ofertas_aceptadas = df[df["Potencia Asignada (MW)"] > 0]
-                precio_marginal = (
-                    df.iloc[0]["Precio (€/MWh)"] if ofertas_aceptadas.empty
-                    else ofertas_aceptadas.iloc[-1]["Precio (€/MWh)"]
-                )
-
-                df["Ingresos (€)"]  = df["Potencia Asignada (MW)"] * precio_marginal
-                df["Costes Op (€)"] = df["Potencia Asignada (MW)"] * df["Coste Op (€/MWh)"]
-
-                if sala["ronda_actual"] == 0:
-                    df["Penalización Cambio (€)"]          = 0
-                    df["Penalización Parada/Arranque (€)"] = 0
+                        sala["aviso_forzado"] = None
                 else:
-                    df["Cambio Carga (MW)"]       = abs(df["Potencia Asignada (MW)"] - df["Potencia Anterior (MW)"])
-                    df["Penalización Cambio (€)"] = df["Cambio Carga (MW)"] * df["Coste Cambio (€/MW)"]
+                    sala["aviso_forzado"] = None
 
-                    def calcular_pa(row):
-                        if row["Potencia Anterior (MW)"] == 0 and row["Potencia Asignada (MW)"] > 0:
-                            return row["Coste P/A Fijo (€)"]
-                        elif row["Potencia Anterior (MW)"] > 0 and row["Potencia Asignada (MW)"] == 0:
-                            return row["Coste P/A Fijo (€)"]
-                        return 0
-
-                    df["Penalización Parada/Arranque (€)"] = df.apply(calcular_pa, axis=1)
-
-                df["Beneficio Neto (€)"] = (
-                    df["Ingresos (€)"]
-                    - df["Costes Op (€)"]
-                    - df["Penalización Cambio (€)"]
-                    - df["Penalización Parada/Arranque (€)"]
-                )
-
-                total_asignado = df["Potencia Asignada (MW)"].sum()
-                if total_asignado < demanda_residual:
-                    sala["hubo_apagon"] = True
-                else:
-                    sala["hubo_apagon"] = False
-                    for _, row in df.iterrows():
-                        eq   = row["Equipo"]
-                        tech = row["Tecnología"]
-                        clave = f"{eq}_{tech}"
-                        sala["potencia_asignada_anterior"][clave] = row["Potencia Asignada (MW)"]
-                        sala["dinero_acumulado"][eq]  += row["Beneficio Neto (€)"]
-                        sala["energia_acumulada"][eq][tech] += row["Potencia Asignada (MW)"]
-
-                    sala["historico_resultados"].append({
-                        "hora":             datos_hora["hora"],
-                        "demanda_residual": demanda_residual,
-                        "precio_marginal":  float(precio_marginal),
-                        "df_records":       df.to_dict("records"),
-                    })
-
-                sala["resultados_df"]   = df.to_dict("records")
-                sala["precio_marginal"] = float(precio_marginal)
-                sala["fase"]            = "resultados"
+                casar_mercado(sala, demanda_residual, datos_hora)
                 st.rerun()
+
 
         # ── FASE: RESULTADOS (HOST) ────────────────────────────────────────────
         elif sala["fase"] == "resultados":
+            if sala.get("aviso_forzado"):
+                st.warning(sala["aviso_forzado"])
+
             if sala["hubo_apagon"]:
                 df_res    = pd.DataFrame(sala["resultados_df"])
                 fig_merit = grafico_blackout(df_res, demanda_residual)
@@ -1037,6 +1292,7 @@ if st.session_state.rol == "host":
                     sala["fase"]        = "ofertando"
                     sala["ofertas"]     = {}
                     sala["hubo_apagon"] = False
+                    iniciar_temporizador(sala)
                     st.rerun()
             else:
                 st.success(
@@ -1048,6 +1304,8 @@ if st.session_state.rol == "host":
                     sala["fase"]         = "ofertando"
                     sala["ofertas"]      = {}
                     sala["ofertas_apagon"] = {}
+                    sala["aviso_forzado"]  = None
+                    iniciar_temporizador(sala)
                     st.rerun()
 
 
@@ -1159,11 +1417,48 @@ if st.session_state.rol == "jugador":
 
     # ── FASE: ENVIAR OFERTAS ──────────────────────────────────────────────────
     if sala["fase"] == "ofertando":
+
+        # ── CUENTA ATRÁS (también visible en el móvil del jugador) ────────────
+        restante_j = segundos_restantes(sala)
+        if restante_j is not None:
+            if restante_j > 0:
+                mins_j, segs_j = divmod(int(restante_j), 60)
+                total_seg_j = max(1, sala.get("duracion_oferta_seg", 1))
+                frac_j = restante_j / total_seg_j
+                if frac_j > 0.5:
+                    bg_j, bd_j, tx_j = "#dcfce7", "#22c55e", "#166534"
+                elif frac_j > 0.2:
+                    bg_j, bd_j, tx_j = "#fef3c7", "#f59e0b", "#b45309"
+                else:
+                    bg_j, bd_j, tx_j = "#fee2e2", "#dc2626", "#991b1b"
+                st.markdown(
+                    f"<div style='background-color:{bg_j};border:2px solid {bd_j};"
+                    f"border-radius:10px;padding:6px;text-align:center;margin-bottom:10px;'>"
+                    f"<span style='color:{tx_j};font-size:0.75rem;font-weight:bold;'>"
+                    f"{t('time_left')}</span><br>"
+                    f"<span style='color:{tx_j};font-size:2rem;font-weight:900;"
+                    f"font-family:monospace;'>{mins_j:02d}:{segs_j:02d}</span></div>",
+                    unsafe_allow_html=True,
+                )
+            else:
+                st.markdown(
+                    "<div style='background-color:#fee2e2;border:2px solid #dc2626;"
+                    "border-radius:10px;padding:6px;text-align:center;margin-bottom:10px;'>"
+                    f"<span style='color:#991b1b;font-size:1.5rem;font-weight:900;'>"
+                    f"{t('time_up')}</span></div>",
+                    unsafe_allow_html=True,
+                )
+
         if mi_equipo in sala["ofertas"]:
             st.success(t("offer_sent"))
             st.info(t("waiting_others"))
             st_autorefresh(interval=2000, key="refresh_jugador_esperando")
         else:
+            # Refresco del reloj mientras el jugador prepara su oferta.
+            # Los widgets del formulario conservan su valor entre refrescos.
+            if restante_j is not None and restante_j > 0:
+                st_autorefresh(interval=1000, key="refresh_jugador_reloj")
+
             st.subheader(t("prepare_offer"))
             mis_ofertas = []
 
@@ -1179,6 +1474,18 @@ if st.session_state.rol == "jugador":
                     pot_anterior    = sala["potencia_asignada_anterior"].get(clave_historial, 0)
 
                     st.markdown(f"**🔌 {tech_display(tech)}** ({t('previous_mw', mw=int(pot_anterior))})")
+
+                    # ── BOTÓN DE APAGADO ──────────────────────────────────────
+                    # Permite bajar a 0 MW saltándose el límite de rampa
+                    # (con su correspondiente coste de parada).
+                    apagada = st.checkbox(
+                        t("shutdown_label"),
+                        key=f"apagar_{ronda}_{tech}",
+                        help=t("shutdown_help"),
+                    )
+                    if apagada:
+                        st.caption(t("shutdown_active"))
+
                     col1, col2 = st.columns(2)
                     with col1:
                         if ronda == 0:
@@ -1197,20 +1504,25 @@ if st.session_state.rol == "jugador":
                         pot = st.slider(
                             f"MW – {tech_display(tech)}", min_sl, max_sl,
                             pot_default,
-                            step=1
+                            step=1,
+                            disabled=apagada,
                         )
                     with col2:
                         apagon_price = float(apagon_lookup[tech]["Precio (€/MWh)"]) if tech in apagon_lookup else float(info["coste_op"])
                         pre = st.number_input(
                             f"€/MWh – {tech_display(tech)}",
                             value=apagon_price,
-                            step=1.0
+                            step=1.0,
+                            disabled=apagada,
                         )
+
+                    # Si la central está apagada, la oferta es 0 MW pase lo que pase
+                    pot_final = 0 if apagada else pot
 
                     mis_ofertas.append({
                         "Equipo":                  mi_equipo,
                         "Tecnología":              tech,
-                        "Potencia Ofertada (MW)":  pot,
+                        "Potencia Ofertada (MW)":  pot_final,
                         "Precio (€/MWh)":          pre,
                         "Coste Op (€/MWh)":        info["coste_op"],
                         "Coste Cambio (€/MW)":     info["coste_cambio"],
@@ -1225,6 +1537,7 @@ if st.session_state.rol == "jugador":
                 if enviado:
                     sala["ofertas"][mi_equipo] = mis_ofertas
                     st.rerun()
+
 
     # ── FASE: RESULTADOS (JUGADOR) ────────────────────────────────────────────
     elif sala["fase"] == "resultados":
