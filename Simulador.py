@@ -479,69 +479,58 @@ def tech_display(tech_internal):
 # 📊 GRÁFICO BLACKOUT
 # ==========================================
 def grafico_blackout(df_resultado, demanda_residual):
-    """Gráfico de apagón SIN información de precios.
+    """Indicador visual de apagón: SÓLO el % de demanda cubierta.
 
-    Durante el apagón los jugadores tienen que rehacer sus ofertas, así que
-    mostrar los precios ofertados por los rivales daría información indebida.
-    Sólo se muestra el % de demanda cubierta por el conjunto del mercado.
+    Sin precios, sin ejes y sin texto accesorio. Durante el apagón los
+    jugadores rehacen sus ofertas, así que cualquier dato de precios de los
+    rivales sería información indebida.
     """
+    from matplotlib.patches import FancyBboxPatch
+
     total_ofertado = float(df_resultado["Potencia Ofertada (MW)"].sum())
     pct_cubierto   = (total_ofertado / demanda_residual) * 100 if demanda_residual else 0
     pct_cubierto   = max(0.0, pct_cubierto)
-    pct_faltante   = max(0.0, 100 - pct_cubierto)
+    pct_dibujado   = min(pct_cubierto, 100.0)
 
-    COLOR_EJES = "#7c7c7c"
+    # Color según lo lejos que se esté de cubrir la demanda
+    if pct_cubierto >= 95:
+        color_fill = "#f59e0b"
+    elif pct_cubierto >= 60:
+        color_fill = "#f97316"
+    else:
+        color_fill = "#dc2626"
 
-    fig, ax = plt.subplots(figsize=(11, 2.6))
+    fig, ax = plt.subplots(figsize=(11, 2.4))
     fig.patch.set_facecolor("#FFFFFF")
     ax.set_facecolor("#FFFFFF")
 
-    # Fondo: la demanda total a cubrir (100 %)
-    ax.barh(0, 100, height=0.55, color="#fee2e2",
-            edgecolor="#dc2626", linewidth=1.5, zorder=2)
+    # Sistema de coordenadas pensado para que las esquinas salgan redondas
+    ax.set_xlim(0, 100)
+    ax.set_ylim(0, 13)
+    ax.axis("off")
 
-    # Barra de lo realmente ofertado por el conjunto del mercado
-    ax.barh(0, min(pct_cubierto, 100), height=0.55,
-            color="#f59e0b", edgecolor="white", linewidth=0, zorder=3)
+    Y0, ALTO, RAD = 1.2, 4.4, 2.2
 
-    # Etiqueta del % cubierto dentro de la barra
-    if pct_cubierto > 12:
-        ax.text(min(pct_cubierto, 100) / 2, 0, f"{pct_cubierto:.1f} %",
-                ha="center", va="center", fontsize=16, fontweight="bold",
-                color="white", zorder=5)
-    else:
-        ax.text(min(pct_cubierto, 100) + 2, 0, f"{pct_cubierto:.1f} %",
-                ha="left", va="center", fontsize=16, fontweight="bold",
-                color="#b45309", zorder=5)
+    # Carril de fondo = 100 % de la demanda
+    ax.add_patch(FancyBboxPatch(
+        (RAD, Y0 + RAD), 100 - 2 * RAD, ALTO - 2 * RAD,
+        boxstyle=f"round,pad={RAD}",
+        facecolor="#f1f5f9", edgecolor="none", zorder=2,
+    ))
 
-    # Etiqueta del hueco que falta por cubrir
-    if pct_faltante > 0:
-        centro_hueco = pct_cubierto + pct_faltante / 2
-        if pct_faltante > 12:
-            ax.text(centro_hueco, 0, f"−{pct_faltante:.1f} %",
-                    ha="center", va="center", fontsize=15, fontweight="bold",
-                    color="#dc2626", zorder=5)
+    # Relleno = lo que el mercado ha conseguido ofertar
+    if pct_dibujado > 0:
+        ancho = max(pct_dibujado, 2 * RAD + 0.1)
+        ax.add_patch(FancyBboxPatch(
+            (RAD, Y0 + RAD), ancho - 2 * RAD, ALTO - 2 * RAD,
+            boxstyle=f"round,pad={RAD}",
+            facecolor=color_fill, edgecolor="none", zorder=3,
+        ))
 
-    # Línea roja del 100 % de la demanda
-    ax.vlines(100, -0.45, 0.45, colors="#dc2626", linewidth=3, zorder=6)
-    ax.text(100, 0.55, t("to_cover") + " (100 %)", fontsize=10,
-            color="#dc2626", ha="right", va="bottom", fontweight="bold")
-
-    ax.text(0, -0.62, t("blackout_offered"), fontsize=9,
-            color=COLOR_EJES, ha="left", va="top")
-
-    ax.set_xlim(-1, 105)
-    ax.set_ylim(-0.9, 0.9)
-    ax.set_yticks([])
-    ax.xaxis.set_major_locator(ticker.MultipleLocator(25))
-    ax.xaxis.set_major_formatter(ticker.PercentFormatter())
-    ax.tick_params(axis="x", colors=COLOR_EJES)
-
-    for lado in ("top", "right", "left"):
-        ax.spines[lado].set_visible(False)
-    ax.spines["bottom"].set_color(COLOR_EJES)
-
-    ax.set_xlabel(t("merit_order_x"), fontsize=10, color=COLOR_EJES)
+    # El gran número: único texto del gráfico
+    ax.text(0, 7.2, f"{pct_cubierto:.1f}%",
+            fontsize=42, fontweight="900", color=color_fill,
+            ha="left", va="bottom", zorder=4)
 
     plt.tight_layout()
     return fig
@@ -1236,35 +1225,19 @@ if st.session_state.rol == "host":
                 st.warning(t("all_offers_required",
                              received=ofertas_recibidas, total=total_equipos))
 
-            col_casar, col_forzar = st.columns([1, 1])
-
-            with col_casar:
-                casar_normal = st.button(
-                    t("clear_market"),
-                    type="primary",
-                    use_container_width=True,
-                    disabled=not todas_enviadas,
+            # Un único botón, SIEMPRE activo: el host decide cuándo cerrar.
+            # Si falta alguna empresa por ofertar, entra con 0 MW.
+            if st.button(
+                t("clear_market"),
+                type="primary",
+                use_container_width=True,
+                help=t("force_close_help"),
+            ):
+                faltantes = rellenar_ofertas_faltantes(sala)
+                sala["aviso_forzado"] = (
+                    t("force_close_warning", equipos=", ".join(faltantes))
+                    if faltantes else None
                 )
-            with col_forzar:
-                forzar_cierre = st.button(
-                    t("force_close"),
-                    use_container_width=True,
-                    help=t("force_close_help"),
-                    disabled=todas_enviadas,
-                )
-
-            if casar_normal or forzar_cierre:
-                faltantes = []
-                if forzar_cierre:
-                    faltantes = rellenar_ofertas_faltantes(sala)
-                    if faltantes:
-                        sala["aviso_forzado"] = t("force_close_warning",
-                                                  equipos=", ".join(faltantes))
-                    else:
-                        sala["aviso_forzado"] = None
-                else:
-                    sala["aviso_forzado"] = None
-
                 casar_mercado(sala, demanda_residual, datos_hora)
                 st.rerun()
 
