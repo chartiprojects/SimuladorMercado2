@@ -1017,17 +1017,45 @@ if st.session_state.rol == "host":
         URL_BASE       = "https://simuladormercado2-tf9xg2yjxcjjfs5dufe6jl.streamlit.app"
         url_invitacion = f"{URL_BASE}/?sala={sala_id}"
 
-        col_izq, col_der = st.columns([1.2, 0.8])
+        # CSS de esta pantalla: botón grande y textos más legibles
+        st.markdown("""
+            <style>
+            div[data-testid="stButton"] > button {
+                height: 80px;
+                border-radius: 14px;
+            }
+            div[data-testid="stButton"] > button p {
+                font-size: 1.5rem !important;
+                font-weight: 800;
+            }
+            div[data-testid="stNumberInput"] label p {
+                font-size: 1.15rem !important;
+                font-weight: 700;
+            }
+            div[data-testid="stNumberInput"] input {
+                font-size: 1.4rem !important;
+                font-weight: 700;
+                text-align: center;
+            }
+            </style>
+        """, unsafe_allow_html=True)
+
+        col_izq, col_der = st.columns([1, 1])
         with col_izq:
             st.markdown(t("scan_to_join"))
             st.code(url_invitacion)
             equipos_unidos = sala["equipos"]
-            st.markdown(f"**{t('registered_companies')} {len(equipos_unidos)}**")
+            st.markdown(
+                f"<p style='font-size:1.4rem;font-weight:800;margin:15px 0 10px 0;'>"
+                f"{t('registered_companies')} {len(equipos_unidos)}</p>",
+                unsafe_allow_html=True,
+            )
 
             if len(equipos_unidos) > 0:
                 nombres_html = " ".join([
-                    f"<span style='background-color:#1e3a8a;color:white;padding:5px 10px;"
-                    f"border-radius:8px;margin:3px;display:inline-block;font-size:0.9rem;'>{eq}</span>"
+                    f"<span style='background-color:#1e3a8a;color:white;padding:10px 18px;"
+                    f"border-radius:10px;margin:5px;display:inline-block;font-size:1.3rem;"
+                    f"font-weight:700;'>{eq}</span>"
                     for eq in equipos_unidos
                 ])
                 st.markdown(nombres_html, unsafe_allow_html=True)
@@ -1038,16 +1066,20 @@ if st.session_state.rol == "host":
 
         with col_der:
             qr = qrcode.make(url_invitacion)
-            st.image(qr.get_image(), width=220)
+            st.image(qr.get_image(), width=420)
 
-        st.markdown("<div style='margin-top:-20px;'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='margin-top:20px;'></div>", unsafe_allow_html=True)
 
         # ── CONFIGURACIÓN DEL TEMPORIZADOR ────────────────────────────────────
-        minutos_oferta = st.number_input(
-            t("timer_setup"),
-            min_value=0.0, max_value=30.0, value=3.0, step=0.5,
-            help=t("timer_help"),
-        )
+        col_t1, col_t2 = st.columns([1, 2])
+        with col_t1:
+            minutos_oferta = st.number_input(
+                t("timer_setup"),
+                min_value=0.0, max_value=30.0, value=3.0, step=0.5,
+                help=t("timer_help"),
+            )
+
+        st.markdown("<div style='margin-top:15px;'></div>", unsafe_allow_html=True)
 
         if st.button(t("start_game"), type="primary", use_container_width=True):
             if len(equipos_unidos) >= 2:
