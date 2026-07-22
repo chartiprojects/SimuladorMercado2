@@ -1063,24 +1063,23 @@ if st.session_state.rol == "host":
             else:
                 st.info(t("waiting_connections"))
 
-            st_autorefresh(interval=2000, key="refresh_host_lobby")
+            st.markdown("<div style='margin-top:20px;'></div>", unsafe_allow_html=True)
 
-        with col_der:
-            qr = qrcode.make(url_invitacion)
-            st.image(qr.get_image(), width=420)
-
-        st.markdown("<div style='margin-top:20px;'></div>", unsafe_allow_html=True)
-
-        # ── CONFIGURACIÓN DEL TEMPORIZADOR ────────────────────────────────────
-        col_t1, col_t2 = st.columns([1, 2])
-        with col_t1:
+            # ── CONFIGURACIÓN DEL TEMPORIZADOR ────────────────────────────────
             minutos_oferta = st.number_input(
                 t("timer_setup"),
                 min_value=0.0, max_value=30.0, value=3.0, step=0.5,
                 help=t("timer_help"),
             )
 
-        st.markdown("<div style='margin-top:15px;'></div>", unsafe_allow_html=True)
+            st.markdown("<div style='margin-top:15px;'></div>", unsafe_allow_html=True)
+
+            st_autorefresh(interval=2000, key="refresh_host_lobby")
+
+        with col_der:
+            qr = qrcode.make(url_invitacion)
+            st.image(qr.get_image(), width=420)
+
 
         if st.button(t("start_game"), type="primary", use_container_width=True):
             if len(equipos_unidos) >= 2:
