@@ -1489,77 +1489,72 @@ if st.session_state.rol == "jugador":
                 if isinstance(row, dict) and row.get("Equipo") == mi_equipo:
                     apagon_lookup[row["Tecnología"]] = row
 
-            # ── APAGADO DE CENTRALES (fuera del form para que reaccione al instante)
-            apagadas = {}
             for tech, info in sala["TECNOLOGIAS"].items():
-                apagadas[tech] = st.checkbox(
-                    f"{t('shutdown_label')} — {tech_display(tech)}",
+                clave_historial = f"{mi_equipo}_{tech}"
+                pot_anterior    = sala["potencia_asignada_anterior"].get(clave_historial, 0)
+
+                st.markdown(f"**🔌 {tech_display(tech)}** ({t('previous_mw', mw=int(pot_anterior))})")
+
+                # Apagar permite bajar a 0 MW saltándose el límite de rampa
+                # (con su correspondiente coste de parada).
+                apagada = st.checkbox(
+                    t("shutdown_label"),
                     key=f"apagar_{ronda}_{tech}",
                     help=t("shutdown_help"),
                 )
+                if apagada:
+                    st.caption(t("shutdown_active"))
 
-            with st.form(key=f"form_oferta_{ronda}"):
-                for tech, info in sala["TECNOLOGIAS"].items():
-                    clave_historial = f"{mi_equipo}_{tech}"
-                    pot_anterior    = sala["potencia_asignada_anterior"].get(clave_historial, 0)
+                col1, col2 = st.columns(2)
+                with col1:
+                    if ronda == 0:
+                        min_sl, max_sl = 0, info["pot_max"]
+                    else:
+                        min_sl = int(max(0, pot_anterior - info["max_cambio"]))
+                        max_sl = int(min(info["pot_max"], pot_anterior + info["max_cambio"]))
 
-                    st.markdown(f"**🔌 {tech_display(tech)}** ({t('previous_mw', mw=int(pot_anterior))})")
+                    if tech in apagon_lookup:
+                        pot_default = int(apagon_lookup[tech]["Potencia Ofertada (MW)"])
+                        pot_default = max(min_sl, min(max_sl, pot_default))
+                    else:
+                        pot_default = int(pot_anterior) if pot_anterior >= min_sl else min_sl
 
-                    apagada = apagadas[tech]
-                    if apagada:
-                        st.caption(t("shutdown_active"))
+                    pot = st.slider(
+                        f"MW – {tech_display(tech)}", min_sl, max_sl,
+                        pot_default,
+                        step=1,
+                        disabled=apagada,
+                        key=f"mw_{ronda}_{tech}",
+                    )
+                with col2:
+                    apagon_price = float(apagon_lookup[tech]["Precio (€/MWh)"]) if tech in apagon_lookup else float(info["coste_op"])
+                    pre = st.number_input(
+                        f"€/MWh – {tech_display(tech)}",
+                        value=apagon_price,
+                        step=1.0,
+                        disabled=apagada,
+                        key=f"pre_{ronda}_{tech}",
+                    )
 
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        if ronda == 0:
-                            min_sl, max_sl = 0, info["pot_max"]
-                        else:
-                            min_sl = int(max(0, pot_anterior - info["max_cambio"]))
-                            max_sl = int(min(info["pot_max"], pot_anterior + info["max_cambio"]))
+                # Si la central está apagada, la oferta es 0 MW pase lo que pase
+                pot_final = 0 if apagada else pot
 
-                        # Default: use the failed blackout offer if available, else pot_anterior
-                        if tech in apagon_lookup:
-                            pot_default = int(apagon_lookup[tech]["Potencia Ofertada (MW)"])
-                            pot_default = max(min_sl, min(max_sl, pot_default))
-                        else:
-                            pot_default = int(pot_anterior) if pot_anterior >= min_sl else min_sl
+                mis_ofertas.append({
+                    "Equipo":                  mi_equipo,
+                    "Tecnología":              tech,
+                    "Potencia Ofertada (MW)":  pot_final,
+                    "Precio (€/MWh)":          pre,
+                    "Coste Op (€/MWh)":        info["coste_op"],
+                    "Coste Cambio (€/MW)":     info["coste_cambio"],
+                    "Coste P/A Fijo (€)":      info["coste_pa"],
+                    "Potencia Anterior (MW)":  pot_anterior,
+                })
+                st.divider()
 
-                        pot = st.slider(
-                            f"MW – {tech_display(tech)}", min_sl, max_sl,
-                            pot_default,
-                            step=1,
-                            disabled=apagada,
-                        )
-                    with col2:
-                        apagon_price = float(apagon_lookup[tech]["Precio (€/MWh)"]) if tech in apagon_lookup else float(info["coste_op"])
-                        pre = st.number_input(
-                            f"€/MWh – {tech_display(tech)}",
-                            value=apagon_price,
-                            step=1.0,
-                            disabled=apagada,
-                        )
-
-                    # Si la central está apagada, la oferta es 0 MW pase lo que pase
-                    pot_final = 0 if apagada else pot
-
-                    mis_ofertas.append({
-                        "Equipo":                  mi_equipo,
-                        "Tecnología":              tech,
-                        "Potencia Ofertada (MW)":  pot_final,
-                        "Precio (€/MWh)":          pre,
-                        "Coste Op (€/MWh)":        info["coste_op"],
-                        "Coste Cambio (€/MW)":     info["coste_cambio"],
-                        "Coste P/A Fijo (€)":      info["coste_pa"],
-                        "Potencia Anterior (MW)":  pot_anterior,
-                    })
-                    st.divider()
-
-                enviado = st.form_submit_button(
-                    t("send_offer"), type="primary", use_container_width=True
-                )
-                if enviado:
-                    sala["ofertas"][mi_equipo] = mis_ofertas
-                    st.rerun()
+            if st.button(t("send_offer"), type="primary", use_container_width=True,
+                         key=f"enviar_{ronda}"):
+                sala["ofertas"][mi_equipo] = mis_ofertas
+                st.rerun()
 
 
     # ── FASE: RESULTADOS (JUGADOR) ────────────────────────────────────────────
