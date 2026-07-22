@@ -973,7 +973,8 @@ if st.session_state.rol == "host":
     if "sala_activa" not in st.session_state:
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
-            _titulo = t("welcome_title").replace("!", "!<br>", 1)
+            _partes = t("welcome_title").split("⚡")
+            _titulo = f"⚡{_partes[1]}⚡<br>{_partes[2].strip()}" if len(_partes) > 2 else t("welcome_title")
             st.markdown(
                 f"<h1 style='text-align:center;font-size:2.3rem;line-height:1.35;"
                 f"margin-top:40px;margin-bottom:40px;'>{_titulo}</h1>",
