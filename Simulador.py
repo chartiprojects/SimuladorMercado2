@@ -1489,6 +1489,15 @@ if st.session_state.rol == "jugador":
                 if isinstance(row, dict) and row.get("Equipo") == mi_equipo:
                     apagon_lookup[row["Tecnología"]] = row
 
+            # ── APAGADO DE CENTRALES (fuera del form para que reaccione al instante)
+            apagadas = {}
+            for tech, info in sala["TECNOLOGIAS"].items():
+                apagadas[tech] = st.checkbox(
+                    f"{t('shutdown_label')} — {tech_display(tech)}",
+                    key=f"apagar_{ronda}_{tech}",
+                    help=t("shutdown_help"),
+                )
+
             with st.form(key=f"form_oferta_{ronda}"):
                 for tech, info in sala["TECNOLOGIAS"].items():
                     clave_historial = f"{mi_equipo}_{tech}"
@@ -1496,14 +1505,7 @@ if st.session_state.rol == "jugador":
 
                     st.markdown(f"**🔌 {tech_display(tech)}** ({t('previous_mw', mw=int(pot_anterior))})")
 
-                    # ── BOTÓN DE APAGADO ──────────────────────────────────────
-                    # Permite bajar a 0 MW saltándose el límite de rampa
-                    # (con su correspondiente coste de parada).
-                    apagada = st.checkbox(
-                        t("shutdown_label"),
-                        key=f"apagar_{ronda}_{tech}",
-                        help=t("shutdown_help"),
-                    )
+                    apagada = apagadas[tech]
                     if apagada:
                         st.caption(t("shutdown_active"))
 
