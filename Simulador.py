@@ -983,7 +983,7 @@ if st.session_state.rol == "host":
             st.markdown("""
                 <style>
                 div[data-testid="stButton"] > button {
-                    height: 90px;
+                    height: 70px;
                     border-radius: 14px;
                 }
                 div[data-testid="stButton"] > button p {
