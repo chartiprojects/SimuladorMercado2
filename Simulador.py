@@ -969,12 +969,28 @@ if st.session_state.rol == "host":
         st.stop()
 
     # ── PASO 1: CREAR SALA ────────────────────────────────────────────────────
+    # ── PASO 1: CREAR SALA ────────────────────────────────────────────────────
     if "sala_activa" not in st.session_state:
-        st.title("⚡ " + t("page_title"))
-
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
-            st.markdown(f"### {t('welcome_title')}")
+            st.markdown(
+                f"<h1 style='text-align:center;font-size:3rem;line-height:1.2;"
+                f"margin-top:40px;margin-bottom:40px;'>{t('welcome_title')}</h1>",
+                unsafe_allow_html=True,
+            )
+
+            st.markdown("""
+                <style>
+                div[data-testid="stButton"] > button {
+                    height: 90px;
+                    border-radius: 14px;
+                }
+                div[data-testid="stButton"] > button p {
+                    font-size: 1.6rem !important;
+                    font-weight: 800;
+                }
+                </style>
+            """, unsafe_allow_html=True)
 
             if st.button(t("generate_room"), type="primary", use_container_width=True):
                 nuevo_pin = str(random.randint(1000, 9999))
